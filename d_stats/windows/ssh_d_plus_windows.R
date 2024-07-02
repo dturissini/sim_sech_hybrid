@@ -3,17 +3,14 @@ library(colorRamps)
 
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- args[1]
-sech_type <- args[2]
+table_suffix <- args[2]
 
-sech_type_suffix <- ''
-if (sech_type != 'all')
-  {sech_type_suffix <- paste('_', sech_type, sep='')}
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 gwas_snp_db_file <- '/proj/matutelb/projects/gwas/gwas_results/sech_oa_only_sim_pca/results/sech_oa_only_sim_pca_snp.db'
-pdf_file <- paste('ssh_dplus_win_', win_size, sech_type_suffix, '.pdf', sep='')
+pdf_file <- paste('ssh_dplus_win_', win_size, '_', table_suffix, '.pdf', sep='')
 
 setwd(base_dir)
 
@@ -22,7 +19,7 @@ conn <- dbConnect(dbDriver("SQLite"), db_file)
 dbSendQuery(conn, paste("attach database '", gwas_snp_db_file, "' as g", sep=''))
 
 #load window and gwas data from db
-d_stats_table <- paste('d_stat_win_', win_size, sech_type_suffix, sep='')
+d_stats_table <- paste('d_stat_win_', win_size, '_', table_suffix, sep='')
 wins <- dbGetQuery(conn, paste("select *, abba + baba + baaa + abaa ab, abba + baba abba_baba, baaa + abaa baaa_abaa
                                 from ", d_stats_table, "
                                 where d_plus is not null", sep=''))
