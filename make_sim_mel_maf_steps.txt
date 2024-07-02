@@ -1,0 +1,32 @@
+cd /proj/matutelb/projects/drosophila/island_gigantism/
+
+
+#confirm same sim genome is used in both hal file and vcf
+grep D_SIMULANS, drosophila_stats.txt
+D_SIMULANS, 0, 131663590, 95, 1897243, 0
+
+grep D_MELANOGASTER, drosophila_stats.txt
+D_MELANOGASTER, 0, 143726002, 1870, 4934870, 0
+
+
+#contig lengths from /proj/matutelb/data_share/simulans_OA_resistance/simulans_sechellia.vcf.gz
+23857595+22319025+23399903+28149585+1146867+22032822+327280+311415+282987+230241+241405+295704+232879+182398+134261+192555+109591+131208+109050+117619+109203+117126+99271+98587+94749+128094+137105+56021+75265+72919+66760+76094+69221+63186+61130+58769+60136+57379+56192+40943+51010+43580+42861+60776+38922+31969+58875+28180+23395+27667+18282+23849+50071+21441+21257+24404+679163+20575+58982+20284+19393+16550+16066+15035+14945+21480+13798+639238+12118+11243+11210+10901+10674+8086+8211+5691+4925+693337+24126+29526+17457+16909+73674+1685566+101365+480410+51425+75162+24312+178737+36306+43881+118028+30549+395173
+131663590
+
+
+#create venv
+virtualenv -p python3 venv-cactus-v2.8.0
+printf "export PATH=$(pwd)/bin:\$PATH\nexport PYTHONPATH=$(pwd)/lib:\$PYTHONPATH\n" >> venv-cactus-v2.8.0/bin/activate
+source venv-cactus-v2.8.0/bin/activate
+python3 -m pip install -U setuptools pip wheel
+python3 -m pip install -U .
+python3 -m pip install -U -r ./toil-requirement.txt
+
+
+#activate venv
+source /proj/matutelb/software/cactus-bin-v2.8.0/venv-cactus-v2.8.0/bin/activate
+
+
+#make maf
+sbatch /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/cactus_hal2maf.sbatch
+

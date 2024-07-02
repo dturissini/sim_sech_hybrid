@@ -1,0 +1,66 @@
+D+ with freqs (eq 2 Fang et al)
+Use mel as ancestral allele
+
+How to get mel alleles as outgroup
+  1) map mel reads to sim genome and merge with vcf?
+    easier to process vcf
+    but could lead to mapping errors and genotype calls
+    would I want to map multiple mel lines?
+  2) liftover from hal file?
+    harder to process vcf 
+      need independent mel allele lookup
+      how to handle mel freqs?
+        just assume it's fixed?
+    
+    could recode vcf by mel as ancestral allele
+      add dummy ancestor to vcf for outgroup
+        use as lookup to determine if vcf alleles (based onm sim ref) is ancestral or need to be flipped to get ancestral/derived alleles
+        filter out any sites that become trialleleic with mel
+          write to log for future reference if needed
+
+
+record and display difference between two site patterns (ABBA-BABA) and (ABAA - BAAA)
+  as well as D+
+  
+distribution of denominator helpful for detemrining window size for D+
+
+Look for ILS enrichment across genome
+  expect neutral ILS to be uniformly distributed
+  comparing ILS and D+ distributions across genomes
+  involves looking at all 8 site pattern
+  looking where gene tree and species trees are discordant
+  look into Trails program
+
+
+look into Twist program (https://github.com/simonhmartin/twisst)
+  paint chromosome by weighted topologies
+  weights tree topologies
+  
+
+
+Aside from introgression, use mel alleles to better categorize gwas snps?
+
+
+Hypothesized demographic history:
+  lots of ancestral variation lead to a ton of ILS in simulans clade
+  most introgression from sech into sim was old (small tracts)
+  introgression involved a lot of ancestral alleles
+  small populations of sech and ssh in Seychelles lead to a lot of drift and fixation
+  enough time has passed for some reproductive isolation with cosmopolitan sim 
+  
+
+Could sim_sech_hybrids just be independent evolution of octanoic acid resistance in Seychelles simulans?
+  Or even if there was historic introgression, did OA resistance still evolve independently?
+
+
+
+Remake filtered vcf with much lower maf threshold
+  redo pca
+  
+  
+  
+Followup:
+All trios between 3 pops
+SNPeff 
+    can call sym vs nonsym using gff and vcf
+    
