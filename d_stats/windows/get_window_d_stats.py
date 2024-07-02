@@ -9,7 +9,7 @@ import sqlite3
 
 
 #create d stats table
-def create_windows_table(conn, win_size, d_stats_table):
+def create_windows_table(conn, win_size, table_suffix, d_stats_table):
   cur = conn.cursor()    
   cur.execute(f"drop table if exists {d_stats_table}")
   cur.execute(f"""create table {d_stats_table}
@@ -21,16 +21,14 @@ def create_windows_table(conn, win_size, d_stats_table):
                    seg_sites int,
                    abba float,
                    baba float,
-                   bbaa float,
                    baaa float,
                    abaa float,
-                   aaba float,
                    d float,
                    d_anc float,
                    d_plus float)""")
 
-  cur.execute(f"create index idx_w_start_end_{win_size} on {d_stats_table}(start,end)")
-  cur.execute(f"create index idx_w_end_{win_size} on {d_stats_table}(end)")
+  cur.execute(f"create index idx_w_start_end_{win_size}_{table_suffix} on {d_stats_table}(start,end)")
+  cur.execute(f"create index idx_w_end_{win_size}_{table_suffix} on {d_stats_table}(end)")
   cur.close()
   
 
@@ -90,11 +88,9 @@ def site_patterns(p1, p2, p3, p4):
     # Calculate site pattern counts.
     abba = np.nansum((1 - p1) * (p2) * (p3) * (1 - p4))
     baba = np.nansum((p1) * (1 - p2) * (p3) * (1 - p4))
-    bbaa = np.nansum((p1) * (p2) * (1 - p3) * (1 - p4))
     baaa = np.nansum((p1) * (1 - p2) * (1 - p3) * (1 - p4))
     abaa = np.nansum((1 - p1) * (p2) * (1 - p3) * (1 - p4))
-    aaba = np.nansum((1 - p1) * (1 - p2) * (p3) * (1 - p4))
-    return abba, baba, bbaa, baaa, abaa, aaba
+    return abba, baba, baaa, abaa
 
 # Define a function to calculate site patterns.
 def dros_site_patterns(
@@ -111,7 +107,7 @@ def dros_site_patterns(
     # If there are no sites called between all three samples...
     if (called_mask.sum() == 0):
         # Set the results to np.nan since we don't have any sites to perform computations on.
-        abba, baba, bbaa, baaa, abaa, aaba = np.zeros(6)
+        abba, baba, baaa, abaa = np.zeros(6)
     # Else...
     else:
         # Determine the indicies where we have varibale sites.
@@ -119,7 +115,7 @@ def dros_site_patterns(
         # If there are no variable sites...
         if (var_mask.sum() == 0):
             # Set the results to 0 since we are iterating over QC'ed regions.
-            abba, baba, bbaa, baaa, abaa, aaba = np.zeros(6)
+            abba, baba, baaa, abaa = np.zeros(6)
         # Else...
         else:
             # Calculate the alternative allele frequencies.
@@ -133,10 +129,10 @@ def dros_site_patterns(
             p3_der_freqs = np.where(p4_alt_freqs > 0.5, np.abs(p3_alt_freqs - 1), p3_alt_freqs)
             p4_der_freqs = np.where(p4_alt_freqs > 0.5, np.abs(p4_alt_freqs - 1), p4_alt_freqs)
             # Calculate the site pattern counts.
-            abba, baba, bbaa, baaa, abaa, aaba = site_patterns(
+            abba, baba, baaa, abaa = site_patterns(
                 p1_der_freqs, p2_der_freqs, p3_der_freqs, p4_der_freqs,
             )
-    return abba, baba, bbaa, baaa, abaa, aaba
+    return abba, baba, baaa, abaa
 
 
 def get_d_stats(abba, baba, baaa, abaa):
@@ -172,19 +168,26 @@ def main():
   zarr_prefix = str(sys.argv[6])
   db_file = str(sys.argv[7])
   
+  table_suffix = p1 + '_' + p2 + '_' + p3 + '_' + p4
+    
+    
   #establish db connection and create d_stats_win table
   conn = sqlite3.connect(db_file)  
-  d_stats_table = "d_stat_win_" + str(win_size)
-  create_windows_table(conn, win_size, d_stats_table)  
-
+  d_stats_table = "d_stat_win_" + str(win_size) + '_' + table_suffix
+  create_windows_table(conn, win_size, table_suffix, d_stats_table)  
+  
+  
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql('select sample, pop from sample_pop', conn)
+  meta_df = pd.read_sql(f"""select s.sample_id, subpop 
+                            from sample_pop s, lk_subpop l
+                            where s.sample_id = l.sample_id
+                            and subpop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
   
   # Intialize pop dictionary.
   idx_dicc = {}
   for pop in [p1, p2, p3, p4]:
       # Fill the dictionary.
-      idx_dicc[pop] = meta_df[meta_df['pop'] == pop].index.values
+      idx_dicc[pop] = meta_df[meta_df['subpop'] == pop].index.values
 
   
   # Intialize a dictionary of chromosome lengths.
@@ -260,10 +263,8 @@ def main():
   dsw_ids = []
   abbas = []
   babas = []
-  bbaas = []
   abaas = []
   baaas = []
-  aabas = []
   ds = []
   d_ancs = []
   d_pluses = [] 
@@ -280,10 +281,8 @@ def main():
       if num_sites == 0:
         abbas.append(np.nan)
         babas.append(np.nan)
-        bbaas.append(np.nan)
         baaas.append(np.nan)
         abaas.append(np.nan)
-        aabas.append(np.nan)
         ds.append(np.nan)
         d_ancs.append(np.nan)
         d_pluses.append(np.nan)
@@ -294,16 +293,14 @@ def main():
         # Identify the window to extract.
         wind_loc = all_pos.locate_range(start, end)
         # Calculate site patterns.
-        abba, baba, bbaa, baaa, abaa, aaba = dros_site_patterns(gt=allel.GenotypeArray(callset[wind_loc]),
-                                                                p1_idx=idx_dicc[p1], p2_idx=idx_dicc[p2],
-                                                                p3_idx=idx_dicc[p3], p4_idx=idx_dicc[p4],
-                                                                )
+        abba, baba, baaa, abaa = dros_site_patterns(gt=allel.GenotypeArray(callset[wind_loc]),
+                                                    p1_idx=idx_dicc[p1], p2_idx=idx_dicc[p2],
+                                                    p3_idx=idx_dicc[p3], p4_idx=idx_dicc[p4],
+                                                    )
         abbas.append(abba)
         babas.append(baba)
-        bbaas.append(bbaa)
         baaas.append(baaa)
         abaas.append(abaa)
-        aabas.append(aaba)
         
         d, d_anc, d_plus = get_d_stats(abba, baba, baaa, abaa)                                                        
         ds.append(d)
@@ -315,10 +312,8 @@ def main():
   window_df.insert(0, 'dsw_id', dsw_ids)
   window_df["abba"] = abbas
   window_df["baba"] = babas
-  window_df["bbaa"] = bbaas
   window_df["baaa"] = baaas
   window_df["abaa"] = abaas
-  window_df["aaba"] = aabas
   window_df["d"] = ds
   window_df["d_anc"] = d_ancs
   window_df["d_plus"] = d_pluses
