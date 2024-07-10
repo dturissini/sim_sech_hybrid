@@ -13,6 +13,7 @@ def create_windows_table(conn, win_size, dxy_win_table):
   cur.execute(f"drop table if exists {dxy_win_table}")
   cur.execute(f"""create table {dxy_win_table}
                   (sadw_id int primary key,
+                   win_id varchar(30),
                    chrom varchar(20),
                    start int,
                    end int,
@@ -24,6 +25,7 @@ def create_windows_table(conn, win_size, dxy_win_table):
   cur.execute(f"create index idx_sadw_start_end_{win_size} on {dxy_win_table}(start,end)")
   cur.execute(f"create index idx_sadw_end_{win_size} on {dxy_win_table}(end)")
   cur.execute(f"create index idx_sadw_sample_id_{win_size} on {dxy_win_table}(sample_id)")
+  cur.execute(f"create index idx_sadw_win_id_{win_size} on {dxy_win_table}(win_id)")
   cur.close()
   
 
@@ -137,6 +139,7 @@ def main():
   
   # Intialize a dictionary to store the results.
   df_dicc = {
+      'win_id': [],
       'chrom': [],
       'start': [],
       'end': [],
@@ -167,6 +170,7 @@ def main():
               # Determine which positions are segregating.
               var_mask = sub_gt.count_alleles().is_variant()
               # Fill the dictionary.
+              df_dicc['win_id'].append(chrom + '_' + str(left))
               df_dicc['chrom'].append(chrom)
               df_dicc['start'].append(left)
               df_dicc['end'].append(right)
@@ -175,6 +179,7 @@ def main():
           # Else, there are no sites in this window.
           else:
               # Fill the dictionary.
+              df_dicc['win_id'].append(chrom + '_' + str(left))
               df_dicc['chrom'].append(chrom)
               df_dicc['start'].append(left)
               df_dicc['end'].append(right)
@@ -191,6 +196,7 @@ def main():
     window_df = pd.DataFrame(df_dicc)  
     
     # Extract ortholog information.
+    win_ids = window_df.win_id.values
     chroms = window_df.chrom.values
     starts = window_df.start.values
     ends = window_df.end.values

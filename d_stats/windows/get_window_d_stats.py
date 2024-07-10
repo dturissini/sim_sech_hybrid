@@ -13,7 +13,7 @@ def create_windows_table(conn, win_size, table_suffix, d_stats_table):
   cur = conn.cursor()    
   cur.execute(f"drop table if exists {d_stats_table}")
   cur.execute(f"""create table {d_stats_table}
-                  (dsw_id int primary key,
+                  (win_id varchar(30) primary key,
                    chrom varchar(20),
                    start int,
                    end int,
@@ -178,16 +178,15 @@ def main():
   
   
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select s.sample_id, subpop 
-                            from sample_pop s, lk_subpop l
+  meta_df = pd.read_sql(f"""select s.sample_id, pop, vcf_order
+                            from sample_pop s, lk_pop l
                             where s.sample_id = l.sample_id
-                            and subpop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
+                            and pop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
   
   # Intialize pop dictionary.
   idx_dicc = {}
   for pop in [p1, p2, p3, p4]:
-      # Fill the dictionary.
-      idx_dicc[pop] = meta_df[meta_df['subpop'] == pop].index.values
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
 
   
   # Intialize a dictionary of chromosome lengths.
@@ -203,6 +202,7 @@ def main():
   
   # Intialize a dictionary to store the results.
   df_dicc = {
+      'win_id': [],
       'chrom': [],
       'start': [],
       'end': [],
@@ -233,6 +233,7 @@ def main():
               # Determine which positions are segregating.
               var_mask = sub_gt.count_alleles().is_variant()
               # Fill the dictionary.
+              df_dicc['win_id'].append(chrom + '_' + str(left))
               df_dicc['chrom'].append(chrom)
               df_dicc['start'].append(left)
               df_dicc['end'].append(right)
@@ -241,6 +242,7 @@ def main():
           # Else, there are no sites in this window.
           else:
               # Fill the dictionary.
+              df_dicc['win_id'].append(chrom + '_' + str(left))
               df_dicc['chrom'].append(chrom)
               df_dicc['start'].append(left)
               df_dicc['end'].append(right)
@@ -254,13 +256,13 @@ def main():
   
   
   # Extract ortholog information.
+  win_ids = window_df.win_id.values
   chroms = window_df.chrom.values
   starts = window_df.start.values
   ends = window_df.end.values
   tot_sites = window_df.num_sites.values
   seg_sites = window_df.seg_sites.values
   
-  dsw_ids = []
   abbas = []
   babas = []
   abaas = []
@@ -270,13 +272,13 @@ def main():
   d_pluses = [] 
   # For every ortholog window.
   for idx in range(window_df.shape[0]):
-      dsw_ids.append(idx + 1)
       # Extract the ortholog information.
       chrom = chroms[idx]
       start = starts[idx]
       end = ends[idx]
       num_sites = tot_sites[idx]
       num_seg_sites = seg_sites[idx]
+
        
       if num_sites == 0:
         abbas.append(np.nan)
@@ -309,7 +311,6 @@ def main():
            
   
   #add columns to window_df
-  window_df.insert(0, 'dsw_id', dsw_ids)
   window_df["abba"] = abbas
   window_df["baba"] = babas
   window_df["baaa"] = baaas

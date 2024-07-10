@@ -13,7 +13,8 @@ cur.execute("drop table if exists sample_pop")
 cur.execute("""create table sample_pop
                (sample_id varchar(100) primary key,
                 pop varchar(50),
-                location varchar(50))""")
+                location varchar(50),
+                vcf_order int)""")
 
 
 #process existing metadata file
@@ -31,6 +32,7 @@ with open(meta_in, 'r') as m:
 
 #insert filtered metadata into sample_pop
 cur_insert = conn.cursor()    
+vcf_order = 0
 with gzip.open(vcf_file, 'rt') as v: 
   for line in v:
     if line[0] == '#' and line[:2] != '##':
@@ -39,8 +41,8 @@ with gzip.open(vcf_file, 'rt') as v:
       for sample in values[9:]:
         cur_insert.execute(f"""insert into sample_pop
                                values
-                               ('{sample}', '{species[sample]}', '{locations[sample]}')""")
-      
+                               ('{sample}', '{species[sample]}', '{locations[sample]}', {vcf_order})""")
+        vcf_order += 1
       break
       
 conn.commit()
