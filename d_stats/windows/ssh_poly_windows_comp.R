@@ -11,7 +11,7 @@ table_suffix_b <- args[3]
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
-db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
+db_file <- paste(base_dir, 'ssh_d_win_test.db', sep='')
 pdf_file <- paste('ssh_poly_win_comp_', win_size, '.pdf', sep='')
 
 setwd(base_dir)
@@ -27,7 +27,7 @@ pops_b <- sort(strsplit(table_suffix_b, '_')[[1]][1:3])
 pops <- unique(c(pops_a, pops_b))
 pop_str <- paste("'", paste(pops, collapse = "', '"), "'", sep='')
 
-sech_pops <- pops[substr(pop, 1, 4) == 'sech']
+sech_pops <- pops[substr(pops, 1, 4) == 'sech']
 
 
 
@@ -102,14 +102,14 @@ for (chrom in chroms)
   plot((d_wins_a$start[win_filter] + d_wins_a$end[win_filter]) / 2, d_wins_a$d_plus[win_filter], type='l', ylim=c(min(d_wins_a$d_plus), max(d_wins_a$d_plus)), xlim=xlim_range, xlab='', xaxt='n', ylab=table_suffix_a, main='')
   abline(h=0, col='grey')
   abline(h=quantile(d_wins_a$d_plus, .99), col=adjustcolor('red', .2))
-  rect(poly_wins_sech_all$start[sech_pi_outlier_filter], rep(-99, sum(sech_pi_outlier_filter)), poly_wins_sech_all$end[sech_pi_outlier_filter], rep(99, sum(sech_pi_outlier_filter)), col=adjustcolor('darkgreen', .4), border=NA)
+  rect(poly_wins$start[sech_pi_outlier_filter], rep(-99, sum(sech_pi_outlier_filter)), poly_wins$end[sech_pi_outlier_filter], rep(99, sum(sech_pi_outlier_filter)), col=adjustcolor('darkgreen', .2), border=NA)
 
 
   win_filter <- d_wins_b$chrom == chrom  & d_wins_b$ab > ab_cutoff
   plot((d_wins_b$start[win_filter] + d_wins_b$end[win_filter]) / 2, d_wins_b$d_plus[win_filter], type='l', ylim=c(min(d_wins_b$d_plus), max(d_wins_b$d_plus)), xlim=xlim_range, xlab='', xaxt='n', ylab=table_suffix_b, main='')
   abline(h=0, col='grey')
   abline(h=quantile(d_wins_b$d_plus, .99), col=adjustcolor('red', .2))
-  rect(poly_wins_sech_all$start[sech_pi_outlier_filter], rep(-99, sum(sech_pi_outlier_filter)), poly_wins_sech_all$end[sech_pi_outlier_filter], rep(99, sum(sech_pi_outlier_filter)), col=adjustcolor('darkgreen', .4), border=NA)
+  rect(poly_wins$start[sech_pi_outlier_filter], rep(-99, sum(sech_pi_outlier_filter)), poly_wins$end[sech_pi_outlier_filter], rep(99, sum(sech_pi_outlier_filter)), col=adjustcolor('darkgreen', .2), border=NA)
 
 
 
@@ -118,11 +118,11 @@ for (chrom in chroms)
   plot(1, type='n', xlim=xlim_range, ylim=pi_range, xlab='', ylab='Sech pi', main='')
   for (pop in sech_pops)
     {
-    points((poly_wins$start[poly_wins$chrom == chrom & poly_wins$pop == pop] + poly_wins$end[[poly_wins$chrom == chrom & poly_wins$pop == pop]]) / 2, poly_wins$pi_sech[[poly_wins$chrom == chrom & poly_wins$pop == pop]], type='l', col=pop_cols$col[pop_cols$pop == pop])
+    points((poly_wins$start[poly_wins$chrom == chrom & poly_wins$pop == pop] + poly_wins$end[poly_wins$chrom == chrom & poly_wins$pop == pop]) / 2, poly_wins$pi[poly_wins$chrom == chrom & poly_wins$pop == pop], type='l', col=pop_cols$col[pop_cols$pop == pop])
     }
   
   legend('topleft', sech_pops, fill = pop_cols$col[pop_cols$pop %in% sech_pops], border=NA)
-  abline(h=sech_all_threshold, col=adjustcolor('darkgreen', .4))
+  abline(h=sech_all_threshold, col=adjustcolor('darkgreen', .2))
 
   }
 par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1))
@@ -130,15 +130,32 @@ dev.off()
 
 
 #test overlap between peaks
-boolean_d_plus_outlier <- (d_wins_a$d_plus > quantile(d_wins_a$d_plus, .99) & d_wins_a$ab > ab_cutoff) | (d_wins_b$d_plus > quantile(d_wins_b$d_plus, .99) & d_wins_b$ab > ab_cutoff)
-boolean_sech_pi_outlier <- poly_wins_sech_all$pi_sech > sech_all_threshold & d_wins_a$ab > ab_cutoff  & d_wins_b$ab > ab_cutoff
-
-num_d_plus_outlier <- sum(boolean_d_plus_outlier)
-num_sech_pi_outlier <- sum(boolean_sech_pi_outlier)
-num_overlap <- sum(boolean_d_plus_outlier & boolean_sech_pi_outlier)
-num_win <- sum(d_wins_a$ab > ab_cutoff  & d_wins_b$ab > ab_cutoff)
-
-paste(num_d_plus_outlier, num_sech_pi_outlier, num_overlap)
-#"38 23 10"
-dhyper(num_overlap, num_d_plus_outlier, num_win - num_d_plus_outlier, num_sech_pi_outlier)
-#[1] 6.977748e-13
+quantiles <- c(.99, .98, .95)
+for (quantile in quantiles)
+  {
+  boolean_d_plus_outlier <- (d_wins_a$d_plus > quantile(d_wins_a$d_plus, quantile) & d_wins_a$ab > ab_cutoff) | (d_wins_b$d_plus > quantile(d_wins_b$d_plus, quantile) & d_wins_b$ab > ab_cutoff)
+  boolean_sech_pi_outlier <- poly_wins$pop == 'sech' & poly_wins$pi > quantile(poly_wins$pi[poly_wins$pop == 'sech'], quantile) & d_wins_a$ab > ab_cutoff  & d_wins_b$ab > ab_cutoff
+  
+  num_d_plus_outlier <- sum(boolean_d_plus_outlier)
+  num_sech_pi_outlier <- sum(boolean_sech_pi_outlier)
+  num_overlap <- sum(boolean_d_plus_outlier & boolean_sech_pi_outlier)
+  num_win <- sum(d_wins_a$ab > ab_cutoff  & d_wins_b$ab > ab_cutoff)
+  
+  cat("quantile", quantile, "\n")
+  cat(num_d_plus_outlier, num_sech_pi_outlier, num_overlap, "\n")
+  cat(dhyper(num_overlap, num_d_plus_outlier, num_win - num_d_plus_outlier, num_sech_pi_outlier), "\n\n\n")
+  }
+  
+##quantile 0.99 
+##38 23 11 
+##1.084038e-14 
+##
+##
+##quantile 0.98 
+##80 45 19 
+##6.524933e-17 
+##
+##
+##quantile 0.95 
+##201 111 40 
+##7.746315e-16 

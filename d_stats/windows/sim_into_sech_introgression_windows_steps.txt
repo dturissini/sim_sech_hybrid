@@ -5,7 +5,7 @@
 ##                                                                                                       melanogaster \
 ##                                                                                                       50000 \
 ##                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
-##                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+##                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win_test.db
 ##                                                                                                       
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechpras \
@@ -14,7 +14,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        mel \
                                                                                                        50000 \
                                                                                                        /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
-                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win_test.db
                                                                                                        
 
 
@@ -24,7 +24,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        mel \
                                                                                                        50000 \
                                                                                                        /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
-                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win_test.db
                                                                                                        
 
 ##Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sech_base_vs_denis_praslin
@@ -47,7 +47,7 @@ Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 #comp
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows_comp.R 50000
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows_comp.R 50000 sim_ssh_sech_mel sechpras_sechbase_sim_mel
 
 #old
 ##python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechellia \
