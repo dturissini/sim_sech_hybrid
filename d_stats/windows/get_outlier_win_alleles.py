@@ -72,18 +72,12 @@ def main():
                     from {d_win_table}
                     where win_id in (select win_id from {sites_table})"""
                     
-                    
-  if outlier_type[:2] == 'pi':
-    outlier_sql = f"""select win_id, chrom, start, end
-                      from {poly_win_table}
-                      where win_id in (select win_id from {sites_table})"""
-  
   outlier_win_df = pd.read_sql(outlier_sql, conn)
   
   
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop_i in ['simulans', 'sim_sech_hybrid', 'sechellia', 'melanogaster']:
+  for pop_i in ['sim', 'ssh', 'sech', 'mel']:
       # Fill the dictionary.
       idx_pop_dicc[pop_i] = meta_df[(meta_df['pop'] == pop_i) | (meta_df['sample_id'] == 'SECH_3-sech_Anro_B3_TTAGGC_L001')].index.values
 
@@ -108,7 +102,7 @@ def main():
       
       
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
-      outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1)
+      outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1)
       
       sample_ids = list(meta_df['sample_id'][(meta_df['pop'] == pop) | (meta_df['sample_id'] == 'SECH_3-sech_Anro_B3_TTAGGC_L001')])
       

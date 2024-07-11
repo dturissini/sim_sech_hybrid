@@ -184,7 +184,7 @@ Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 #get sech alleles
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sechellia \
+                                                                                                            sech \
                                                                                                             d_plus \
                                                                                                             sim_ssh_sech_mel \
                                                                                                             /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
@@ -192,7 +192,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sechellia \
+                                                                                                            sech \
                                                                                                             random \
                                                                                                             sim_ssh_sech_mel \
                                                                                                             /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
@@ -200,7 +200,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sechellia \
+                                                                                                            sech \
                                                                                                             pi_sech \
                                                                                                             sim_ssh_sech_mel \
                                                                                                             /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
@@ -208,19 +208,19 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sechellia \
+                                                                                                                              sech \
                                                                                                                               d_plus \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sechellia \
+                                                                                                                              sech \
                                                                                                                               random \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sechellia \
+                                                                                                                              sech \
                                                                                                                               pi_sech \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db

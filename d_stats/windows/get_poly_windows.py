@@ -170,7 +170,7 @@ def main():
   create_windows_table(conn, win_size, poly_win_table, sfs_table)
 
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select s.sample_id, pop, vcf_order
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
                             from sample_pop s, lk_pop l
                             where s.sample_id = l.sample_id""", conn)
   

@@ -49,7 +49,7 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 samples <- dbGetQuery(conn, paste("select pop, location, sample_id
                                    from sample_pop
-                                   where pop in ('sim_sech_hybrid', 'sechellia')
+                                   where pop in ('ssh', 'sech')
                                    order by pop, location, sample_id", sep=''))
 
 

@@ -107,7 +107,7 @@ def dros_site_patterns(
     # If there are no sites called between all three samples...
     if (called_mask.sum() == 0):
         # Set the results to np.nan since we don't have any sites to perform computations on.
-        abba, baba, baaa, abaa = np.zeros(6)
+        abba, baba, baaa, abaa = np.zeros(4)
     # Else...
     else:
         # Determine the indicies where we have varibale sites.
@@ -115,7 +115,7 @@ def dros_site_patterns(
         # If there are no variable sites...
         if (var_mask.sum() == 0):
             # Set the results to 0 since we are iterating over QC'ed regions.
-            abba, baba, baaa, abaa = np.zeros(6)
+            abba, baba, baaa, abaa = np.zeros(4)
         # Else...
         else:
             # Calculate the alternative allele frequencies.
@@ -178,10 +178,10 @@ def main():
   
   
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select s.sample_id, pop, vcf_order
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
                             from sample_pop s, lk_pop l
                             where s.sample_id = l.sample_id
-                            and pop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
+                            and l.pop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
   
   # Intialize pop dictionary.
   idx_dicc = {}

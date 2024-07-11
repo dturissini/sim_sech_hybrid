@@ -132,15 +132,15 @@ def main():
   
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop in ['simulans', 'sim_sech_hybrid', 'sechellia', 'melanogaster']:
+  for pop in ['sim', 'ssh', 'sech', 'mel']:
       # Fill the dictionary.
       idx_pop_dicc[pop] = meta_df[meta_df['pop'] == pop].index.values
 
       
   idx_sech_loc_dicc = {}  
-  sech_locs = set(meta_df['location'][meta_df['pop'] == 'sechellia'] )
+  sech_locs = set(meta_df['location'][meta_df['pop'] == 'sech'] )
   for sech_loc in sech_locs:
-    idx_sech_loc_dicc[sech_loc] = meta_df[(meta_df['pop'] == 'sechellia') & (meta_df['location'] == sech_loc)].index.values
+    idx_sech_loc_dicc[sech_loc] = meta_df[(meta_df['pop'] == 'sech') & (meta_df['location'] == sech_loc)].index.values
       
   
   
@@ -187,16 +187,16 @@ def main():
       
 
       # Compute derived allele freq
-      total_sim, der_sim = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['simulans'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_ssh, der_ssh = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sim_sech_hybrid'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech, der_sech = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechellia'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
+      total_sim, der_sim = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sim'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_ssh, der_ssh = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['ssh'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech, der_sech = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sech'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
 
-      total_sech_anro, der_sech_anro = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Anro, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech_denis, der_sech_denis = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Denis, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech_ladigue, der_sech_ladigue = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['La Digue, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech_marianne, der_sech_marianne = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Marianne, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech_praslin, der_sech_praslin = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Praslin, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
-      total_sech_unknown, der_sech_unknown = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Unknown'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['melanogaster'], axis=1))
+      total_sech_anro, der_sech_anro = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Anro, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_denis, der_sech_denis = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Denis, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_ladigue, der_sech_ladigue = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['La Digue, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_marianne, der_sech_marianne = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Marianne, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_praslin, der_sech_praslin = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Praslin, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_unknown, der_sech_unknown = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Unknown'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
 
  
       for pos in all_pos[wind_loc]:
@@ -207,7 +207,7 @@ def main():
         positions.append(pos)
         
 
-      mel_alleles.extend(win_gt.take(idx_pop_dicc['melanogaster'], axis=1)[:, 0, 0])
+      mel_alleles.extend(win_gt.take(idx_pop_dicc['mel'], axis=1)[:, 0, 0])
       
       total_sims.extend(total_sim)
       total_sshs.extend(total_ssh)

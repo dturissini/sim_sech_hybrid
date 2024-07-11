@@ -115,11 +115,11 @@ def main():
                             from sample_pop""", conn)
   
   
-  sech_focal_sample_ids = meta_df['sample_id'][(meta_df['pop'] == 'sechellia') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))]
+  sech_focal_sample_ids = meta_df['sample_id'][(meta_df['pop'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))]
   
   # Intialize pop dictionary.
   idx_dicc = {}
-  idx_dicc['sech_anro'] = meta_df[(meta_df['pop'] == 'sechellia') & (meta_df['location'] == 'Anro, Seychelles')].index.values
+  idx_dicc['sech_anro'] = meta_df[(meta_df['pop'] == 'sech') & (meta_df['location'] == 'Anro, Seychelles')].index.values
   for sample_id in sech_focal_sample_ids:
     idx_dicc[sample_id] = meta_df[meta_df['sample_id'] == sample_id].index.values
     

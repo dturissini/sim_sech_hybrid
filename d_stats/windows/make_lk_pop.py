@@ -21,20 +21,20 @@ cur.execute(f"create index idx_ls_sample_id on lk_pop(sample_id)")
 with open(pop_file, 'r') as s:
   for line in s:
     line = line.strip()
-    pop, pop, locations = line.split("\t")
+    pop, species, locations = line.split("\t")
     
     if locations == 'ALL':
       cur.execute(f"""insert into lk_pop
                       select null, '{pop}', sample_id
                       from sample_pop
-                      where pop = '{pop}'""")      
+                      where pop = '{species}'""")      
     else:
       location_str = "'" + "', '".join(locations.split('~')) + "'"
       
       cur.execute(f"""insert into lk_pop
                       select null, '{pop}', sample_id
                       from sample_pop
-                      where pop = '{pop}'
+                      where pop = '{species}'
                       and location in ({location_str})""")
 
 conn.commit()

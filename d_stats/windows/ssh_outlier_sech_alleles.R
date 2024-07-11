@@ -6,7 +6,6 @@ args <- commandArgs(trailingOnly = TRUE)
 win_size <- as.character(args[1])
 outlier_type <- as.character(args[2])
 pop_str <- as.character(args[3])
-table_suffix <- as.character(args[4])
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
@@ -26,9 +25,9 @@ dbSendQuery(conn, paste("attach database '", anno_db_file, "' as a", sep=''))
 dbSendQuery(conn, paste("attach database '", orthodb_file, "' as o", sep=''))
 
 #load window and gwas data from db
-d_stats_table <- paste('d_stat_win_', win_size, '_', table_suffix, sep='')
+d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 win_site_table <- paste('outlier_', outlier_type, '_win_sites_', win_size, '_', pop_str, sep='')
-allele_table <- paste('outlier_', outlier_type, '_win_alleles_sechellia_', win_size, '_', pop_str, sep='')
+allele_table <- paste('outlier_', outlier_type, '_win_alleles_sech_', win_size, '_', pop_str, sep='')
 allele_dist_table <- paste('outlier_', outlier_type, '_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 
 
@@ -52,7 +51,7 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 samples <- dbGetQuery(conn, paste("select location, sample_id
                                    from sample_pop
-                                   where pop = 'sechellia'
+                                   where pop = 'sech'
                                    order by location, sample_id", sep=''))
 
 

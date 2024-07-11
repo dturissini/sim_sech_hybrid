@@ -43,11 +43,9 @@ def site_patterns(p1, p2, p3, p4):
     # Calculate site pattern counts.
     abba = np.nansum((1 - p1) * (p2) * (p3) * (1 - p4))
     baba = np.nansum((p1) * (1 - p2) * (p3) * (1 - p4))
-    bbaa = np.nansum((p1) * (p2) * (1 - p3) * (1 - p4))
     baaa = np.nansum((p1) * (1 - p2) * (1 - p3) * (1 - p4))
     abaa = np.nansum((1 - p1) * (p2) * (1 - p3) * (1 - p4))
-    aaba = np.nansum((1 - p1) * (1 - p2) * (p3) * (1 - p4))
-    return abba, baba, bbaa, baaa, abaa, aaba
+    return abba, baba, baaa, abaa
 
 # Define a function to calculate site patterns.
 def dros_site_patterns(
@@ -64,7 +62,7 @@ def dros_site_patterns(
     # If there are no sites called between all three samples...
     if (called_mask.sum() == 0):
         # Set the results to np.nan since we don't have any sites to perform computations on.
-        results = np.full(6, np.nan)
+        results = np.full(4, np.nan)
     # Else...
     else:
         # Determine the indicies where we have varibale sites.
@@ -72,7 +70,7 @@ def dros_site_patterns(
         # If there are no variable sites...
         if (var_mask.sum() == 0):
             # Set the results to 0 since we are iterating over QC'ed regions.
-            results = np.zeros(6)
+            results = np.zeros(4)
         # Else...
         else:
             # Calculate the alternative allele frequencies.
@@ -86,11 +84,11 @@ def dros_site_patterns(
             p3_der_freqs = np.where(p4_alt_freqs > 0.5, np.abs(p3_alt_freqs - 1), p3_alt_freqs)
             p4_der_freqs = np.where(p4_alt_freqs > 0.5, np.abs(p4_alt_freqs - 1), p4_alt_freqs)
             # Calculate the site pattern counts.
-            abba, baba, bbaa, baaa, abaa, aaba = site_patterns(
+            abba, baba, baaa, abaa = site_patterns(
                 p1_der_freqs, p2_der_freqs, p3_der_freqs, p4_der_freqs,
             )
             # Intialize a results array.
-            results = np.array([abba, baba, bbaa, baaa, abaa, aaba])
+            results = np.array([abba, baba, baaa, abaa])
     return results
 
 
