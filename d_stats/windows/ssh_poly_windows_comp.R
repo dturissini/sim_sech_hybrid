@@ -11,7 +11,7 @@ table_suffix_b <- args[3]
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
-db_file <- paste(base_dir, 'ssh_d_win_test.db', sep='')
+db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 pdf_file <- paste('ssh_poly_win_comp_', win_size, '.pdf', sep='')
 
 setwd(base_dir)
