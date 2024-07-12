@@ -58,7 +58,7 @@ pca_plots('sechbase_pca', sechbase_pops)
 #sech_ssh
 sech_ssh_pops <- dbGetQuery(conn, "select sample_id, l.pop, col
                                    from lk_pop l, pop_cols c
-                                   where l.pop in ('sshlad', 'sshmahe', 'sechden', 'sechpras', 'sechanro', 'sechlad', 'sechunk', 'sechmari')
+                                   where l.pop in ('sshlad', 'sshmahe', 'sshanro', 'sechden', 'sechpras', 'sechanro', 'sechlad', 'sechunk', 'sechmari')
                                    and l.pop = c.pop")
 
 pca_plots('sech_ssh_pca', sech_ssh_pops)
