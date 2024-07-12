@@ -13,6 +13,7 @@ def main():
   
   conn = sqlite3.connect(db_file)  
   win_allele_table = "outlier_" + outlier_type + "_win_alleles_" + pop + "_" + str(win_size) + '_' + pop_str
+  win_allele_table_sech = "outlier_" + outlier_type + "_win_alleles_sech_" + str(win_size) + '_' + pop_str
   adj_allele_dist_table = "outlier_" + outlier_type + "_win_sech_adj_allele_dist_" + str(win_size) + '_' + pop_str
 
   cur = conn.cursor()    
@@ -29,7 +30,7 @@ def main():
 
   cur.execute(f"""insert into {adj_allele_dist_table}
                   select null, a.win_id, a.sample_id, 100.0 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2
-                  from {win_allele_table} a, {win_allele_table} a2
+                  from {win_allele_table} a, {win_allele_table_sech} a2
                   where a.win_id = a2.win_id
                   and a.pos = a2.pos
                   and a.num_der_alleles != -2

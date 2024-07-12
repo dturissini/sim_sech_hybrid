@@ -29,7 +29,7 @@ win_site_table <- paste('outlier_d_plus_win_sites_', win_size, '_', pop_str, sep
 allele_table_sech <- paste('outlier_d_plus_win_alleles_sech_', win_size, '_', pop_str, sep='')
 allele_table_ssh <- paste('outlier_d_plus_win_alleles_ssh_', win_size, '_', pop_str, sep='')
 
-pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe'"
+pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe', 'sshanro'"
 
 
 tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
@@ -169,7 +169,7 @@ for (win_id in sort(unique(win_sites$win_id)))
                                      and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
                                      union all
                                      select a.pos, a.sample_id, a.num_der_alleles, abs(a2.num_der_alleles - a.num_der_alleles) num_der_alleles_adj
-                                     from ", allele_table_ssh, " a, ", allele_table_ssh, " a2
+                                     from ", allele_table_ssh, " a, ", allele_table_sech, " a2
                                      where a.win_id = '", win_id, "'
                                      and a.win_id = a2.win_id
                                      and a.pos = a2.pos
@@ -191,7 +191,7 @@ for (win_id in sort(unique(win_sites$win_id)))
                                              group by pop, a.sample_id
                                              union all
                                              select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_ssh, " a, ", allele_table_ssh, " a2, lk_pop l
+                                             from ", allele_table_ssh, " a, ", allele_table_sech, " a2, lk_pop l
                                              where a.win_id = '", win_id, "'
                                              and a.win_id = a2.win_id
                                              and a.pos = a2.pos

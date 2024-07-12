@@ -79,7 +79,7 @@ def main():
   idx_pop_dicc = {}
   for pop_i in ['sim', 'ssh', 'sech', 'mel']:
       # Fill the dictionary.
-      idx_pop_dicc[pop_i] = meta_df[(meta_df['pop'] == pop_i) | (meta_df['sample_id'] == 'SECH_3-sech_Anro_B3_TTAGGC_L001')].index.values
+      idx_pop_dicc[pop_i] = meta_df[meta_df['pop'] == pop_i].index.values
 
       
   
@@ -104,7 +104,7 @@ def main():
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
       outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1)
       
-      sample_ids = list(meta_df['sample_id'][(meta_df['pop'] == pop) | (meta_df['sample_id'] == 'SECH_3-sech_Anro_B3_TTAGGC_L001')])
+      sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
       
       
       
