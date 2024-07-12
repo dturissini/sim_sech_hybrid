@@ -115,12 +115,12 @@ def main():
                             from sample_pop""", conn)
   
   
-  sech_focal_sample_ids = meta_df['sample_id'][(meta_df['pop'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))]
+  focal_sample_ids = meta_df['sample_id'][((meta_df['pop'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))) | (meta_df['pop'] == 'sech')]
   
   # Intialize pop dictionary.
   idx_dicc = {}
   idx_dicc['sech_anro'] = meta_df[(meta_df['pop'] == 'sech') & (meta_df['location'] == 'Anro, Seychelles')].index.values
-  for sample_id in sech_focal_sample_ids:
+  for sample_id in focal_sample_ids:
     idx_dicc[sample_id] = meta_df[meta_df['sample_id'] == sample_id].index.values
     
       
@@ -190,7 +190,7 @@ def main():
   # Convert the dictionary to a dataframe.
   
   sadw_id = 0
-  for sample_id in sech_focal_sample_ids:
+  for sample_id in focal_sample_ids:
     print(sample_id)
 
     window_df = pd.DataFrame(df_dicc)  

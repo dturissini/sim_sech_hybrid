@@ -26,8 +26,10 @@ dbSendQuery(conn, paste("attach database '", orthodb_file, "' as o", sep=''))
 #load window and gwas data from db
 d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 win_site_table <- paste('outlier_d_plus_win_sites_', win_size, '_', pop_str, sep='')
-allele_table_sech <- paste('outlier_d_plus_win_alleles_sechellia_', win_size, '_', pop_str, sep='')
-allele_table_ssh <- paste('outlier_d_plus_win_alleles_sim_sech_hybrid_', win_size, '_', pop_str, sep='')
+allele_table_sech <- paste('outlier_d_plus_win_alleles_sech_', win_size, '_', pop_str, sep='')
+allele_table_ssh <- paste('outlier_d_plus_win_alleles_ssh_', win_size, '_', pop_str, sep='')
+
+pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe'"
 
 
 tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
@@ -47,10 +49,10 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 
 
-samples <- dbGetQuery(conn, paste("select pop, location, sample_id
-                                   from sample_pop
-                                   where pop in ('ssh', 'sech')
-                                   order by pop, location, sample_id", sep=''))
+samples <- dbGetQuery(conn, paste("select pop, sample_id
+                                   from lk_pop
+                                   where pop in (", pop_sql_str, ")
+                                   order by pop, sample_id", sep=''))
 
 
 gwas_pos <- dbGetQuery(conn, paste("select win_id, g.chrom, pos, p, start, end, d_plus
@@ -124,11 +126,11 @@ win_size <- as.numeric(win_size)
 
 
 
-sample_loc <- data.frame(cbind(c(rep('sechellia', 6), rep('sim_sech_hybrid', 3)),
-                               c('sech - Anro', 'sech - Denis', 'sech - La Digue', 'sech - Marianne', 'sech - Praslin', 'sech - Unk', 'ssh - Anro','ssh - La Digue', 'ssh - Mahe'),
-                               c('Anro, Seychelles', 'Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles', 'Unknown', 'Anro, Seychelles', 'La Digue, Seychelles', 'Mahe, Seychelles'),
-                               c('orange', 'purple', 'green', 'darkblue', 'lightblue', 'gray', 'orange3', 'pink', 'olivedrab')))
-names(sample_loc) <- c('pop', 'display_loc', 'location', 'loc_col')
+sech_ssh_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
+                                         from pop_cols
+                                         where pop in (", pop_sql_str, ")
+                                         order by pop", sep=''))
+
 
 
 
@@ -150,9 +152,9 @@ for (win_id in sort(unique(win_sites$win_id)))
     mtext(substr(genes$synonyms[genes$win_id == win_id], 1, 30), side = 3, line = 0:2, at = (sapply(genes$start[genes$win_id == win_id], max, min(win_sites$pos[win_sites$win_id == win_id])) + sapply(genes$end[genes$win_id == win_id], min, max(win_sites$pos[win_sites$win_id == win_id]))) / 2, cex=.5)
     }
   
-  for (i in 1:nrow(sample_loc))
+  for (i in 1:nrow(sech_ssh_pops))
     {
-    mtext(sample_loc$display_loc[i], side=2, at = i/nrow(sample_loc) - 1/nrow(sample_loc), line=5, col=sample_loc$loc_col[i], las=2, cex=.5, adj=1)
+    mtext(sech_ssh_pops$short_desc[i], side=2, at = i/nrow(sech_ssh_pops) - 1/nrow(sech_ssh_pops), line=5, col=sech_ssh_pops$col[i], las=2, cex=.5, adj=1)
     }
 
   #ssh alleles
@@ -176,31 +178,33 @@ for (win_id in sort(unique(win_sites$win_id)))
                                      and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
                                      order by a.pos, a.sample_id", sep=''))
   
-  adj_allele_dist <- dbGetQuery(conn, paste("select pop, location, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_sech, " a, ", allele_table_sech, " a2, sample_pop s
+  adj_allele_dist <- dbGetQuery(conn, paste("select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
+                                             from ", allele_table_sech, " a, ", allele_table_sech, " a2, lk_pop l
                                              where a.win_id = '", win_id, "'
                                              and a.win_id = a2.win_id
                                              and a.pos = a2.pos
-                                             and a.sample_id = s.sample_id
+                                             and a.sample_id = l.sample_id
+                                             and pop in (", pop_sql_str, ")
                                              and a.num_der_alleles != -2
                                              and a2.num_der_alleles != -2
                                              and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
-                                             group by pop, location, a.sample_id
+                                             group by pop, a.sample_id
                                              union all
-                                             select pop, location, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_ssh, " a, ", allele_table_ssh, " a2, sample_pop s
+                                             select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
+                                             from ", allele_table_ssh, " a, ", allele_table_ssh, " a2, lk_pop l
                                              where a.win_id = '", win_id, "'
                                              and a.win_id = a2.win_id
                                              and a.pos = a2.pos
-                                             and a.sample_id = s.sample_id
+                                             and a.sample_id = l.sample_id
+                                             and pop in (", pop_sql_str, ")
                                              and a.num_der_alleles != -2
                                              and a2.num_der_alleles != -2
                                              and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
-                                             group by pop, location, a.sample_id
-                                             order by pop, location, a.sample_id", sep=''))
+                                             group by pop, a.sample_id
+                                             order by pop, a.sample_id", sep=''))
   
   
-  axis_cols <- merge(sample_loc, samples, by = c('pop', 'location'))
+  axis_cols <- merge(sech_ssh_pops, samples, by = 'pop')
   dist_cols <- matlab.like(101)
   
   allele_cols <- adjustcolor(c('navy', 'forestgreen', 'maroon'), .6)
@@ -208,7 +212,7 @@ for (win_id in sort(unique(win_sites$win_id)))
   plot(1, type='n', xlim=range(win_sites$pos[win_sites$win_id == win_id]), ylim=c(0, nrow(samples)), xlab=paste('Pos on', d_wins$chrom[d_wins$win_id == win_id]), ylab='', main='', yaxt='n')
   for (i in 1:nrow(samples))
     {
-    axis(2, at = i - 0.5, labels=samples$sample_id[i], las=2, cex.axis=.5, col.axis=axis_cols$loc_col[i])
+    axis(2, at = i - 0.5, labels=samples$sample_id[i], las=2, cex.axis=.5, col.axis=axis_cols$col[i])
     points(alleles$pos[alleles$sample_id == samples$sample_id[i]], rep(i - 0.5, sum(alleles$sample_id == samples$sample_id[i])), pch=15, cex=.7, col=allele_cols[1 + alleles$num_der_alleles_adj[alleles$sample_id == samples$sample_id[i]]])
     rect(min(alleles$pos) - 3/25 * win_size , i - 1, min(alleles$pos) - 0.1/25 * win_size, i, col=dist_cols[adj_allele_dist$adj_dist[i]], border=NA)
     }

@@ -30,6 +30,7 @@ win_site_table <- paste('outlier_', outlier_type, '_win_sites_', win_size, '_', 
 allele_table <- paste('outlier_', outlier_type, '_win_alleles_sech_', win_size, '_', pop_str, sep='')
 allele_dist_table <- paste('outlier_', outlier_type, '_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 
+pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk'"
 
 
 tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
@@ -49,10 +50,10 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 
 
-samples <- dbGetQuery(conn, paste("select location, sample_id
-                                   from sample_pop
-                                   where pop = 'sech'
-                                   order by location, sample_id", sep=''))
+samples <- dbGetQuery(conn, paste("select pop, sample_id
+                                   from lk_pop
+                                   where pop in (", pop_sql_str, ")
+                                   order by pop, sample_id", sep=''))
 
 
 gwas_pos <- dbGetQuery(conn, paste("select win_id, g.chrom, pos, p, start, end, d_plus
@@ -124,10 +125,10 @@ dbSendQuery(conn, paste("drop table if exists", tmp_dsw_table))
 
 win_size <- as.numeric(win_size)
 
-sech_loc <- data.frame(cbind(c('sech - Anro', 'sech - Denis', 'sech - La Digue', 'sech - Marianne', 'sech - Praslin', 'sech - Unk'),
-                 c('Anro, Seychelles', 'Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles', 'Unknown'),
-                 c('orange', 'purple', 'green', 'darkblue', 'lightblue', 'gray')))
-names(sech_loc) <- c('display_loc', 'location', 'loc_col')
+sech_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
+                                     from pop_cols
+                                     where pop in (", pop_sql_str, ")
+                                     order by pop", sep=''))
 
 
 
@@ -149,9 +150,9 @@ for (win_id in sort(unique(win_sites$win_id)))
     mtext(substr(genes$synonyms[genes$win_id == win_id], 1, 30), side = 3, line = 0:2, at = (sapply(genes$start[genes$win_id == win_id], max, min(win_sites$pos[win_sites$win_id == win_id])) + sapply(genes$end[genes$win_id == win_id], min, max(win_sites$pos[win_sites$win_id == win_id]))) / 2, cex=.5)
     }
   
-  for (i in 1:nrow(sech_loc))
+  for (i in 1:nrow(sech_pops))
     {
-    mtext(sech_loc$display_loc[i], side=2, at = i/nrow(sech_loc) - 1/nrow(sech_loc), line=5, col=sech_loc$loc_col[i], las=2, cex=.5, adj=1)
+    mtext(sech_pops$short_desc[i], side=2, at = i/nrow(sech_pops) - 1/nrow(sech_pops), line=5, col=sech_pops$col[i], las=2, cex=.5, adj=1)
     }
 
   #sech alleles
@@ -167,13 +168,14 @@ for (win_id in sort(unique(win_sites$win_id)))
                                      order by a.pos, a.sample_id", sep=''))
   
   adj_allele_dist <- dbGetQuery(conn, paste("select a.sample_id, round(adj_allele_dist) + 1 adj_dist
-                                             from ", allele_dist_table, " a, sample_pop s
+                                             from ", allele_dist_table, " a, lk_pop l
                                              where win_id = '", win_id, "'
-                                             and a.sample_id = s.sample_id
-                                             order by location, a.sample_id", sep=''))
+                                             and a.sample_id = l.sample_id
+                                             and pop in (", pop_sql_str, ")
+                                             order by l.pop, a.sample_id", sep=''))
   
   
-  axis_cols <- merge(sech_loc, samples, by = 'location')  
+  axis_cols <- merge(sech_pops, samples, by = 'pop')  
   dist_cols <- matlab.like(101)
   
   allele_cols <- adjustcolor(c('navy', 'forestgreen', 'maroon'), .6)
@@ -181,7 +183,7 @@ for (win_id in sort(unique(win_sites$win_id)))
   plot(1, type='n', xlim=range(win_sites$pos[win_sites$win_id == win_id]), ylim=c(0, nrow(samples)), xlab=paste('Pos on', d_wins$chrom[d_wins$win_id == win_id]), ylab='', main='', yaxt='n')
   for (i in 1:nrow(samples))
     {
-    axis(2, at = i - 0.5, labels=samples$sample_id[i], las=2, cex.axis=.5, col.axis=axis_cols$loc_col[i])
+    axis(2, at = i - 0.5, labels=samples$sample_id[i], las=2, cex.axis=.5, col.axis=axis_cols$col[i])
     points(alleles$pos[alleles$sample_id == samples$sample_id[i]], rep(i - 0.5, sum(alleles$sample_id == samples$sample_id[i])), pch=15, cex=.7, col=allele_cols[1 + alleles$num_der_alleles_adj[alleles$sample_id == samples$sample_id[i]]])
     rect(min(alleles$pos) - 3/25 * win_size , i - 1, min(alleles$pos) - 0.1/25 * win_size, i, col=dist_cols[adj_allele_dist$adj_dist[i]], border=NA)
     text(min(alleles$pos) - 0.5/25 * win_size, i - 0.5, adj_allele_dist$adj_dist[i] - 1, col='darkgray')

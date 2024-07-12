@@ -26,63 +26,45 @@ poly_win_table <- paste('poly_win_', win_size, sep='')
 
 poly_wins <- dbGetQuery(conn, paste("select * 
                                      from ", poly_win_table, "
-                                     where pi_sim is not null
-                                     and pi_sech is not null
-                                     and pi_ssh is not null", sep=''))
+                                     where win_id in (select distinct win_id 
+                                                      from ", dxy_wins_table, ")", sep=''))
 
 
 
-dxy_wins <- dbGetQuery(conn, paste("select s.sample_id, location, chrom, start, end, dxy_sech_anro, num_sites,
-                                   case when location = 'Denis, Seychelles' then 'purple'
-                                        when location = 'La Digue, Seychelles' then 'green'
-                                        when location = 'Marianne, Seychelles' then 'darkblue'
-                                        when location = 'Praslin, Seychelles' then 'lightblue'
-                                   else 'gray' end col
-                                   from sample_pop s, ", dxy_wins_table, " d, 
+dxy_wins <- dbGetQuery(conn, paste("select s.sample_id, location, chrom, start, end, dxy_sech_anro, num_sites, col
+                                   from sample_pop s, ", dxy_wins_table, " d, pop_cols c, 
                                         (select sum(adj_allele_dist) cum_dist, sample_id
                                          from ", outlier_adj_allele_table, "
                                          group by sample_id) x
                                    where d.sample_id = s.sample_id
                                    and d.sample_id = x.sample_id
                                    and dxy_sech_anro is not null
+                                   and s.pop = c.pop
                                    order by s.sample_id, chrom, start", sep=''))
 
-win_avg_dxy <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist,
-                                       case when location = 'Denis, Seychelles' then 'purple'
-                                            when location = 'La Digue, Seychelles' then 'green'
-                                            when location = 'Marianne, Seychelles' then 'darkblue'
-                                            when location = 'Praslin, Seychelles' then 'lightblue'
-                                       else 'gray' end col
-                                       from sample_pop s, ", dxy_wins_table, " d, 
+win_avg_dxy <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist, col
+                                       from sample_pop s, ", dxy_wins_table, " d, pop_cols c, 
                                             (select sum(adj_allele_dist) cum_dist, sample_id
                                              from ", outlier_adj_allele_table, "
                                              group by sample_id) x
                                        where d.sample_id = s.sample_id
                                        and d.sample_id = x.sample_id
+                                       and s.pop = c.pop
                                        group by s.sample_id, location", sep=''))
 
 
-avg_dxy <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist,
-                                   case when location = 'Denis, Seychelles' then 'purple'
-                                        when location = 'La Digue, Seychelles' then 'green'
-                                        when location = 'Marianne, Seychelles' then 'darkblue'
-                                        when location = 'Praslin, Seychelles' then 'lightblue'
-                                   else 'gray' end col
-                                   from sample_pop s, ", dxy_wins_table, " d, 
+avg_dxy <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist, col
+                                   from sample_pop s, ", dxy_wins_table, " d, pop_cols c, 
                                         (select sum(adj_allele_dist) cum_dist, sample_id
                                          from ", outlier_adj_allele_table, "
                                          group by sample_id) x
                                    where d.sample_id = s.sample_id
                                    and d.sample_id = x.sample_id
+                                   and s.pop = c.pop
                                    group by s.sample_id, location", sep=''))
 
-avg_dxy_no_outlier_025_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist,
-                                                              case when location = 'Denis, Seychelles' then 'purple'
-                                                                   when location = 'La Digue, Seychelles' then 'green'
-                                                                   when location = 'Marianne, Seychelles' then 'darkblue'
-                                                                   when location = 'Praslin, Seychelles' then 'lightblue'
-                                                              else 'gray' end col
-                                                              from sample_pop s, ", dxy_wins_table, " d, 
+avg_dxy_no_outlier_025_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist, col
+                                                              from sample_pop s, ", dxy_wins_table, " d, pop_cols c, 
                                                                    (select sum(adj_allele_dist) cum_dist, sample_id
                                                                     from ", outlier_adj_allele_table, "
                                                                     group by sample_id) x
@@ -93,16 +75,12 @@ avg_dxy_no_outlier_025_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id
                                                                               where p.chrom = d.chrom
                                                                               and p.start = d.start
                                                                               and pi_sech > 0.025)
+                                                              and s.pop = c.pop
                                                               group by s.sample_id, location", sep=''))
 
 
-avg_dxy_no_outlier_01_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist,
-                                                              case when location = 'Denis, Seychelles' then 'purple'
-                                                                   when location = 'La Digue, Seychelles' then 'green'
-                                                                   when location = 'Marianne, Seychelles' then 'darkblue'
-                                                                   when location = 'Praslin, Seychelles' then 'lightblue'
-                                                              else 'gray' end col
-                                                              from sample_pop s, ", dxy_wins_table, " d, 
+avg_dxy_no_outlier_01_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id, location, sum(dxy_sech_anro) / count(*) avg_dxy, cum_dist, col
+                                                              from sample_pop s, ", dxy_wins_table, " d, pop_cols c, 
                                                                    (select sum(adj_allele_dist) cum_dist, sample_id
                                                                     from ", outlier_adj_allele_table, "
                                                                     group by sample_id) x
@@ -113,6 +91,7 @@ avg_dxy_no_outlier_01_sech_pi_win <- dbGetQuery(conn, paste("select s.sample_id,
                                                                               where p.chrom = d.chrom
                                                                               and p.start = d.start
                                                                               and pi_sech > 0.01)
+                                                              and s.pop = c.pop
                                                               group by s.sample_id, location", sep=''))
 
 

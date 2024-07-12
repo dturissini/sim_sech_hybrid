@@ -4,21 +4,24 @@ library(colorRamps)
 
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- as.character(args[1])
+pop_str <- as.character(args[2])
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
-pdf_file <- paste('ssh_outlier_pi_sech_adj_allele_dists_', win_size, '.pdf', sep='')
+pdf_file <- paste('ssh_outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_str, '.pdf', sep='')
 
 setwd(base_dir)
 
 #db connection
 conn <- dbConnect(dbDriver("SQLite"), db_file)
 
-allele_dist_d_plus_table <- paste('outlier_d_plus_win_sech_adj_allele_dist_', win_size, sep='')
-allele_dist_pi_sech_table <- paste('outlier_pi_sech_win_sech_adj_allele_dist_', win_size, sep='')
-allele_dist_random_table <- paste('outlier_random_win_sech_adj_allele_dist_', win_size, sep='')
 
+allele_dist_d_plus_table <- paste('outlier_d_plus_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
+allele_dist_pi_sech_table <- paste('outlier_pi_sech_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
+allele_dist_random_table <- paste('outlier_random_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
+
+pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk'"
 
 
 allele_dist_d_plus <- dbGetQuery(conn, paste("select *
@@ -31,16 +34,11 @@ allele_dist_random <- dbGetQuery(conn, paste("select *
                                               from ", allele_dist_random_table, sep=''))
 
 
-samples <- dbGetQuery(conn, paste("select location, sample_id
-                                   from sample_pop
-                                   where pop = 'sechellia'
-                                   order by location, sample_id", sep=''))
+samples <- dbGetQuery(conn, paste("select pop, sample_id
+                                   from lk_pop
+                                   where pop in (", pop_sql_str, ")
+                                   order by pop, sample_id", sep=''))
 
-
-sech_loc <- data.frame(cbind(c('sech - Anro', 'sech - Denis', 'sech - La Digue', 'sech - Marianne', 'sech - Praslin', 'sech - Unk'),
-                 c('Anro, Seychelles', 'Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles', 'Unknown'),
-                 c('orange', 'purple', 'green', 'darkblue', 'lightblue', 'gray')))
-names(sech_loc) <- c('display_loc', 'location', 'loc_col')
 
 
 pdf(pdf_file, height=8, width=10.5)

@@ -202,7 +202,7 @@ for (chrom in chroms)
   fst_range <- range(poly_diff_wins$fst[win_poly_diff_filter])
   plot((poly_diff_wins$start[win_poly_diff_filter_12] + poly_diff_wins$end[win_poly_diff_filter_12]) / 2, poly_diff_wins$fst[win_poly_diff_filter_12], xlim=xlim_range, type='l', col=col_12, ylim=fst_range, xlab='Pos', xaxt='n', ylab='Fst', main='')
   points((poly_diff_wins$start[win_poly_diff_filter_13] + poly_diff_wins$end[win_poly_diff_filter_13]) / 2, poly_diff_wins$fst[win_poly_diff_filter_13], type='l', col=col_13)
-  points((poly_diff_wins$start[win_poly_diff_filter_23] + poly_diff_wins$end[win_poly_diff_filter_23]) / 2, poly_diff_wins$fst[win_poly_diff_filter_23], type='l', col='orange')
+  points((poly_diff_wins$start[win_poly_diff_filter_23] + poly_diff_wins$end[win_poly_diff_filter_23]) / 2, poly_diff_wins$fst[win_poly_diff_filter_23], type='l', col=col_23)
   legend('topleft', c(paste(pops[1], '-', pops[2], sep=''), paste(pops[1], '-', pops[3], sep=''), paste(pops[2], '-', pops[3], sep='')), fill = c(col_12, col_13, col_23), border=NA)
   rect(gwas_pos$start[gwas_pos$chrom == chrom], rep(-99, sum(gwas_pos$chrom == chrom)), gwas_pos$end[gwas_pos$chrom == chrom], rep(99, sum(gwas_pos$chrom == chrom)), col=adjustcolor('gray', .2), border=NA)
 
