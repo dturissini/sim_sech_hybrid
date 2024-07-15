@@ -111,11 +111,11 @@ def main():
   create_windows_table(conn, win_size, dxy_win_table)  
 
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select sample_id, pop, location
-                            from sample_pop""", conn)
+  meta_df = pd.read_sql(f"""select sample_id, species, location
+                            from sample_species""", conn)
   
   
-  focal_sample_ids = meta_df['sample_id'][((meta_df['pop'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))) | (meta_df['pop'] == 'sech')]
+  focal_sample_ids = meta_df['sample_id'][((meta_df['species'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))) | (meta_df['species'] == 'ssh')]
   
   # Intialize pop dictionary.
   idx_dicc = {}

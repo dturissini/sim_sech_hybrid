@@ -169,7 +169,7 @@ def main():
 
   # Read in meta data as a pandas dataframe.
   meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
-                            from sample_pop s, lk_pop l
+                            from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id""", conn)
   
   pops = list(set(meta_df['pop']))

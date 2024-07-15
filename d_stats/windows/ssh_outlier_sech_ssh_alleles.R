@@ -50,7 +50,7 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 
 samples <- dbGetQuery(conn, paste("select pop, sample_id
-                                   from lk_pop
+                                   from sample_pop_link
                                    where pop in (", pop_sql_str, ")
                                    order by pop, sample_id", sep=''))
 
@@ -179,7 +179,7 @@ for (win_id in sort(unique(win_sites$win_id)))
                                      order by a.pos, a.sample_id", sep=''))
   
   adj_allele_dist <- dbGetQuery(conn, paste("select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_sech, " a, ", allele_table_sech, " a2, lk_pop l
+                                             from ", allele_table_sech, " a, ", allele_table_sech, " a2, sample_pop_link l
                                              where a.win_id = '", win_id, "'
                                              and a.win_id = a2.win_id
                                              and a.pos = a2.pos
@@ -191,7 +191,7 @@ for (win_id in sort(unique(win_sites$win_id)))
                                              group by pop, a.sample_id
                                              union all
                                              select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_ssh, " a, ", allele_table_sech, " a2, lk_pop l
+                                             from ", allele_table_ssh, " a, ", allele_table_sech, " a2, sample_pop_link l
                                              where a.win_id = '", win_id, "'
                                              and a.win_id = a2.win_id
                                              and a.pos = a2.pos

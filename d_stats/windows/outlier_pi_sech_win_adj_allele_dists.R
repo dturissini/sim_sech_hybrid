@@ -35,7 +35,7 @@ allele_dist_random <- dbGetQuery(conn, paste("select *
 
 
 samples <- dbGetQuery(conn, paste("select pop, sample_id
-                                   from lk_pop
+                                   from sample_pop_link
                                    where pop in (", pop_sql_str, ")
                                    order by pop, sample_id", sep=''))
 

@@ -65,8 +65,8 @@ def main():
   
   
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select sample_id, pop, location
-                            from sample_pop""", conn)
+  meta_df = pd.read_sql(f"""select sample_id, species, location
+                            from sample_species""", conn)
 
   outlier_sql = f"""select win_id, chrom, start, end
                     from {d_win_table}
