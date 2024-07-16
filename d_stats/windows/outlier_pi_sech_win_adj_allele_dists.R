@@ -2,9 +2,11 @@ library("RSQLite")
 library(fields)
 library(colorRamps)
 
+#process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- as.character(args[1])
 pop_str <- as.character(args[2])
+
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
@@ -13,17 +15,21 @@ pdf_file <- paste('ssh_outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_st
 
 setwd(base_dir)
 
-#db connection
+
+make #db connection
 conn <- dbConnect(dbDriver("SQLite"), db_file)
 
 
+#define db tables
 allele_dist_d_plus_table <- paste('outlier_d_plus_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 allele_dist_pi_sech_table <- paste('outlier_pi_sech_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 allele_dist_random_table <- paste('outlier_random_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 
+#define str of pops to use in db queries
 pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk'"
 
 
+#get allele distances
 allele_dist_d_plus <- dbGetQuery(conn, paste("select *
                                               from ", allele_dist_d_plus_table, sep=''))
 
@@ -34,6 +40,7 @@ allele_dist_random <- dbGetQuery(conn, paste("select *
                                               from ", allele_dist_random_table, sep=''))
 
 
+#get samples and pops
 samples <- dbGetQuery(conn, paste("select pop, sample_id
                                    from sample_pop_link
                                    where pop in (", pop_sql_str, ")
@@ -41,6 +48,7 @@ samples <- dbGetQuery(conn, paste("select pop, sample_id
 
 
 
+#make plots of the histograms of adjusted allele distances for each sample
 pdf(pdf_file, height=8, width=10.5)
 for (i in 1:nrow(samples))
   {

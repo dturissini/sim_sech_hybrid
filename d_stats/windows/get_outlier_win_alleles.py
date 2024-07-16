@@ -79,11 +79,11 @@ def main():
   idx_pop_dicc = {}
   for pop_i in ['sim', 'ssh', 'sech', 'mel']:
       # Fill the dictionary.
-      idx_pop_dicc[pop_i] = meta_df[meta_df['pop'] == pop_i].index.values
+      idx_pop_dicc[pop_i] = meta_df[meta_df['species'] == pop_i].index.values
 
       
   
-  # For every outlier window
+  # Get alleles for the user provided pop for every outlier window 
   odwsa_id = 0
   with tempfile.NamedTemporaryFile(mode='w') as t:
     for idx in range(outlier_win_df.shape[0]):
@@ -104,7 +104,7 @@ def main():
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
       outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1)
       
-      sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
+      sample_ids = list(meta_df['sample_id'][meta_df['species'] == pop])
       
       
       

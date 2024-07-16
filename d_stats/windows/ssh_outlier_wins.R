@@ -2,11 +2,13 @@ library("RSQLite")
 library(fields)
 library(colorRamps)
 
+#process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- as.character(args[1])
 outlier_type <- args[2]
 pop_str <- args[3]
 
+\
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
@@ -24,11 +26,12 @@ dbSendQuery(conn, paste("attach database '", gwas_snp_db_file, "' as g", sep='')
 dbSendQuery(conn, paste("attach database '", anno_db_file, "' as a", sep=''))
 dbSendQuery(conn, paste("attach database '", orthodb_file, "' as o", sep=''))
 
-#load window and gwas data from db
+#define db tables
 d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 win_site_table <- paste('outlier_', outlier_type, '_win_sites_', win_size, '_', pop_str, sep='')
 tmp_dsw_table <- paste(outlier_type, '_tmp_dsw_', win_size, sep='')
 
+#load window and gwas data from db
 d_wins <- dbGetQuery(conn, paste("select *
                                   from ", d_stats_table, "
                                   where d_plus is not null", sep=''))
@@ -47,6 +50,8 @@ gwas_pos <- dbGetQuery(conn, paste("select win_id, g.chrom, pos, p, start, end, 
                                     and pos between start and end
                                     and p < 1e-7", sep=''))
 
+
+#make temporary table of outlier windows to speed up queries identifying overlapping homologous melanogaster genes
 dbSendQuery(conn, paste("drop table if exists", tmp_dsw_table))
 dbSendQuery(conn, paste("create table ", tmp_dsw_table, " as
                          select distinct s.win_id, w.chrom, start, end
@@ -56,6 +61,13 @@ dbSendQuery(conn, paste("create table ", tmp_dsw_table, " as
 dbSendQuery(conn, paste("create index idx_se_", outlier_type, win_size, " on ", tmp_dsw_table, "(start, end)", sep=''))
 dbSendQuery(conn, paste("create index idx_e_", outlier_type, win_size, " on ", tmp_dsw_table, "(end)", sep=''))
 
+#get genes overlapping windows and identify mel orthologs
+#there are four distinct queries to optimize index use for the four different ways a gene and window can overlap. 
+#Some genes will be selected in multiple queries but the use of unions will remove duplicates
+#1) gene start within window
+#2) gene end within window
+#3) window start within gene
+#4) window end within gene
 genes <- dbGetQuery(conn, paste("select w.win_id, gi.start, gi.end, group_concat(distinct synonyms order by synonyms) synonyms
                                  from ", tmp_dsw_table, " w, gene_info gi, gene_xrefs gx, og2genes og, og2genes og2, genes g
                                  where w.chrom = gi.chrom
@@ -107,12 +119,12 @@ genes <- dbGetQuery(conn, paste("select w.win_id, gi.start, gi.end, group_concat
 
 dbSendQuery(conn, paste("drop table if exists", tmp_dsw_table))
 
-
+#plot derived allele freqs for each outlier window
 pdf(pdf_file, height=8, width=10.5)
 layout(matrix(c(1, 1, 1, 2, 3, 3, 3, 4, 5, 5, 5, 6, 7, 7, 7, 8, 9, 9, 9, 10), nrow=5, byrow=T))
 for (win_id in sort(unique(win_sites$win_id)))
   {
-  #sim
+  #sim derived allele freqs
   par(mar=c(0, 4.1, 4.1, 0))
   plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles_sim[win_sites$win_id == win_id] / win_sites$total_alleles_sim[win_sites$win_id == win_id], pch=20, col='blue', xaxt='n', xlab='', ylim=c(0,1), ylab='Derived freq', main='')
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')
@@ -129,19 +141,9 @@ for (win_id in sort(unique(win_sites$win_id)))
   legend('topright', 'sim', fill='blue', border=NA, cex=3, bty='n')
   mtext(paste('D+ = ', round(d_wins$d_plus[d_wins$win_id == win_id], 2), ' (', round(sum(d_wins$d_plus[d_wins$win_id == win_id] > d_wins$d_plus) / length(d_wins$d_plus), 3), ' percentile)', sep=''), 0, side=3, line=1, at=0, adj=0)
     
-  #ssh
+  #ssh derived allele freqs
   par(mar=c(0, 4.1, 0, 0))
   plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles_ssh[win_sites$win_id == win_id] / win_sites$total_alleles_ssh[win_sites$win_id == win_id], pch=20, col='gold', xaxt='n', xlab='', ylim=c(0,1), ylab='Derived freq', main='')
-
-#  abba_filter <- win_sites$der_freq_sim[win_sites$win_id == win_id] == 0 & win_sites$der_freq_ssh[win_sites$win_id == win_id] == 1 & win_sites$der_freq_sech[win_sites$win_id == win_id] == 1
-#  baba_filter <- win_sites$der_freq_sim[win_sites$win_id == win_id] == 1 & win_sites$der_freq_ssh[win_sites$win_id == win_id] == 0 & win_sites$der_freq_sech[win_sites$win_id == win_id] == 1
-#  baaa_filter <- win_sites$der_freq_sim[win_sites$win_id == win_id] == 1 & win_sites$der_freq_ssh[win_sites$win_id == win_id] == 0 & win_sites$der_freq_sech[win_sites$win_id == win_id] == 0
-#  abaa_filter <- win_sites$der_freq_sim[win_sites$win_id == win_id] == 0 & win_sites$der_freq_ssh[win_sites$win_id == win_id] == 1 & win_sites$der_freq_sech[win_sites$win_id == win_id] == 0
-#  
-#  points(win_sites$pos[abba_filter], win_sites$der_alleles_ssh[abba_filter], pch='x')
-#  points(win_sites$pos[baba_filter], win_sites$der_alleles_ssh[baba_filter], pch='x')
-#  points(win_sites$pos[baaa_filter], win_sites$der_alleles_ssh[baaa_filter], pch='O')
-#  points(win_sites$pos[abaa_filter], win_sites$der_alleles_ssh[abaa_filter], pch='O')
 
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')
   if (sum(genes$win_id == win_id) > 0)
@@ -156,7 +158,7 @@ for (win_id in sort(unique(win_sites$win_id)))
   legend('topright', 'ssh', fill='gold', border=NA, cex=3, bty='n')
 
 
-  #sech
+  #sech derived allele freqs
   par(mar=c(0, 4.1, 0, 0))
   plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles_sech[win_sites$win_id == win_id] / win_sites$total_alleles_sech[win_sites$win_id == win_id], pch=20, col='red', xaxt='n', ylim=c(0,1), ylab='Derived freq', main='')
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')

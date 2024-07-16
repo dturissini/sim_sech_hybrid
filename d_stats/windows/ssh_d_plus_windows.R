@@ -1,6 +1,8 @@
 library("RSQLite")  
 library(colorRamps)
 
+
+#process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- args[1]
 pop_str <- args[2]
@@ -18,6 +20,7 @@ setwd(base_dir)
 conn <- dbConnect(dbDriver("SQLite"), db_file)
 dbSendQuery(conn, paste("attach database '", gwas_snp_db_file, "' as g", sep=''))
 
+
 #load window and gwas data from db
 d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 wins <- dbGetQuery(conn, paste("select *, abba + baba + baaa + abaa ab, abba + baba abba_baba, baaa + abaa baaa_abaa
@@ -30,10 +33,16 @@ gwas_pos <- dbGetQuery(conn, paste("select g.chrom, pos, p, start, end, d_plus
                                     and pos between start and end
                                     and p < 1e-7", sep=''))
 
-
+#get unique chromosomes
 chroms <- sort(unique(wins$chrom))
+
+#set threshold for number of called sites per window
 num_sites_cutoff <- as.numeric(win_size) / 50
+
+
+#set threshold for ab sum per window
 ab_cutoff <- as.numeric(win_size) / 10000
+
 
 pdf(pdf_file, height=8, width=10.5)
 #hist of sites per window
@@ -41,6 +50,7 @@ hist(wins$num_sites, breaks=seq(0, max(wins$num_sites) + 100, 100), col='black',
 abline(v=num_sites_cutoff, col='red')
 
 
+#histograms of AB totals with and without cutoffs
 par(mfrow=c(3,1))
 hist(wins$ab, breaks=seq(0, max(wins$ab) + 10, 10), col='black', xlab='AB total', ylab='windows', main=c('AB total', paste('window size =', win_size)))
 abline(v=ab_cutoff, col='red')
@@ -57,6 +67,7 @@ hist(wins$baaa_abaa[wins$num_sites > num_sites_cutoff & wins$ab > ab_cutoff], br
 par(mfrow=c(1,1))
 
 
+#scatterplot of number of called sites and AB sum by window
 plot(wins$num_sites, wins$ab, pch=20, col=adjustcolor('gray', .6), xlab='num sites', ylab='AB total', main='num sites vs AB total')
 abline(v=num_sites_cutoff, col='red')
 abline(h=ab_cutoff, col='red')
@@ -69,6 +80,7 @@ abline(v=quantile(wins$d_plus[wins$num_sites > num_sites_cutoff & wins$ab > ab_c
 text(quantile(wins$d_plus[wins$num_sites > num_sites_cutoff & wins$ab > ab_cutoff], .99) + .1, max(d_plus_hist$counts), paste('.99 quantile =', round(quantile(wins$d_plus[wins$num_sites > num_sites_cutoff & wins$ab > ab_cutoff], .99), 3)), col='red')
 
 
+#scatterplots of D+ vs AB sum to help identify a relevant ab threshold
 par(mfrow=c(3,1))
 plot(wins$ab[wins$num_sites > num_sites_cutoff], wins$d_plus[wins$num_sites > num_sites_cutoff], pch=20, col=adjustcolor('gray', .6), xlim=c(0, max(wins$ab[wins$num_sites > num_sites_cutoff])), xlab='AB total', ylab='D+', main=c('AB total vs D+', paste('num sites >', num_sites_cutoff)))
 abline(v=ab_cutoff, col='red')

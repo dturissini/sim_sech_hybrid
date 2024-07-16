@@ -32,8 +32,8 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 
-#make lk_pop linking sample_ids to pops
-python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_lk_pop.py /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/ssh_pops.txt \
+#make sample_pop_link linking sample_ids to pops
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_sample_pop_link.py /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/ssh_pops.txt \
                                                                                                 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 
@@ -210,21 +210,36 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                             /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
                                                                                                             /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
+#look at sech and ssh alleles to see if putative sech inversions are also present in ssh (spoiler: they don't seem to be)
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
+                                                                                                            ssh \
+                                                                                                            d_plus \
+                                                                                                            sim_ssh_sech_mel \
+                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
+                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+
+
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
+                                                                                                            ssh \
+                                                                                                            pi_sech \
+                                                                                                            sim_ssh_sech_mel \
+                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
+                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+
+
+
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sech \
                                                                                                                               d_plus \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sech \
                                                                                                                               random \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              sech \
                                                                                                                               pi_sech \
                                                                                                                               sim_ssh_sech_mel \
                                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
@@ -238,21 +253,12 @@ Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_alleles.R 50000 random sim_ssh_sech_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_alleles.R 50000 pi_sech sim_ssh_sech_mel
 
+
+
+
+
+
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_pi_sech_win_adj_allele_dists.R 50000 sim_ssh_sech_mel
-
-
-
-
-#look at sech and ssh alleles to see if putative sech inversions are also present in ssh (spoiler: they don't seem to be)
-python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            ssh \
-                                                                                                            d_plus \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
-                                                                                                            /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
-
-
-
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_ssh_alleles.R 50000 sim_ssh_sech_mel
 
 
@@ -262,6 +268,6 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                               /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
 
 
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/sech_anro_dxy_windows.R 50000
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/sech_anro_dxy_windows.R 50000 sim_ssh_sech_mel
 
 

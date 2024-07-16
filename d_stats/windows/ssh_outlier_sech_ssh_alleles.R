@@ -2,6 +2,7 @@ library("RSQLite")
 library(fields)
 library(colorRamps)
 
+#process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- as.character(args[1])
 pop_str <- as.character(args[2])
@@ -28,12 +29,14 @@ d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 win_site_table <- paste('outlier_d_plus_win_sites_', win_size, '_', pop_str, sep='')
 allele_table_sech <- paste('outlier_d_plus_win_alleles_sech_', win_size, '_', pop_str, sep='')
 allele_table_ssh <- paste('outlier_d_plus_win_alleles_ssh_', win_size, '_', pop_str, sep='')
+tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
 
+#define pop str to use in db queries
 pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe', 'sshanro'"
 
 
-tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
 
+#get win data from db
 d_wins <- dbGetQuery(conn, paste("select *
                                   from ", d_stats_table, "
                                   where d_plus is not null", sep=''))
@@ -49,18 +52,27 @@ win_sites <- dbGetQuery(conn, paste("select *,
 
 
 
+                                     #get samples and pops from db 
 samples <- dbGetQuery(conn, paste("select pop, sample_id
                                    from sample_pop_link
                                    where pop in (", pop_sql_str, ")
                                    order by pop, sample_id", sep=''))
 
+#get pops and colors for plotting
+sech_ssh_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
+                                         from pop_cols
+                                         where pop in (", pop_sql_str, ")
+                                         order by pop", sep=''))
 
+
+#get gwas data from db
 gwas_pos <- dbGetQuery(conn, paste("select win_id, g.chrom, pos, p, start, end, d_plus
                                     from gwas_snp g, ", d_stats_table, " w
                                     where g.chrom = w.chrom
                                     and pos between start and end
                                     and p < 1e-7", sep=''))
 
+#make temporary table of outlier windows to speed up queries identifying overlapping homologous melanogaster genes
 dbSendQuery(conn, paste("drop table if exists", tmp_dsw_table))
 dbSendQuery(conn, paste("create table ", tmp_dsw_table, " as
                          select distinct s.win_id, w.chrom, start, end
@@ -70,6 +82,13 @@ dbSendQuery(conn, paste("create table ", tmp_dsw_table, " as
 dbSendQuery(conn, paste("create index idx_se_outlier", win_size, " on ", tmp_dsw_table, "(start, end)", sep=''))
 dbSendQuery(conn, paste("create index idx_e_outlier", win_size, " on ", tmp_dsw_table, "(end)", sep=''))
 
+#get genes overlapping windows and identify mel orthologs
+#there are four distinct queries to optimize index use for the four different ways a gene and window can overlap. 
+#Some genes will be selected in multiple queries but the use of unions will remove duplicates
+#1) gene start within window
+#2) gene end within window
+#3) window start within gene
+#4) window end within gene
 genes <- dbGetQuery(conn, paste("select w.win_id, gi.start, gi.end, group_concat(distinct synonyms order by synonyms) synonyms
                                  from ", tmp_dsw_table, " w, gene_info gi, gene_xrefs gx, og2genes og, og2genes og2, genes g
                                  where w.chrom = gi.chrom
@@ -119,17 +138,13 @@ genes <- dbGetQuery(conn, paste("select w.win_id, gi.start, gi.end, group_concat
                                  group by w.win_id, gi.start, gi.end
                                  order by w.win_id, gi.start", sep='')) 
 
+#drop tmp table
 dbSendQuery(conn, paste("drop table if exists", tmp_dsw_table))
 
 
 win_size <- as.numeric(win_size)
 
 
-
-sech_ssh_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
-                                         from pop_cols
-                                         where pop in (", pop_sql_str, ")
-                                         order by pop", sep=''))
 
 
 
@@ -157,7 +172,7 @@ for (win_id in sort(unique(win_sites$win_id)))
     mtext(sech_ssh_pops$short_desc[i], side=2, at = i/nrow(sech_ssh_pops) - 1/nrow(sech_ssh_pops), line=5, col=sech_ssh_pops$col[i], las=2, cex=.5, adj=1)
     }
 
-  #ssh alleles
+  #get sech alleles and adjusted allele distance for each sample
   par(mar=c(5.1, 10.1, 0, 1.1))
   alleles <- dbGetQuery(conn, paste("select a.pos, a.sample_id, a.num_der_alleles, abs(a2.num_der_alleles - a.num_der_alleles) num_der_alleles_adj
                                      from ", allele_table_sech, " a, ", allele_table_sech, " a2
@@ -207,6 +222,9 @@ for (win_id in sort(unique(win_sites$win_id)))
   axis_cols <- merge(sech_ssh_pops, samples, by = 'pop')
   dist_cols <- matlab.like(101)
   
+  #plot colored alleles for each sample. Alleles are polarized for a sech Anro sample (SECH_3-sech_Anro_B3_TTAGGC_L001) taking advantage of very low polymorphism.
+  #the plots help identify which samples are polymorphic for the outlier windows and where haplotypic variation exists
+  #blue: homozygous anro allele, red: homozygous alt allele, green heterozygous
   allele_cols <- adjustcolor(c('navy', 'forestgreen', 'maroon'), .6)
   geno_types = c('homo 1', 'het', 'homo 2')
   plot(1, type='n', xlim=range(win_sites$pos[win_sites$win_id == win_id]), ylim=c(0, nrow(samples)), xlab=paste('Pos on', d_wins$chrom[d_wins$win_id == win_id]), ylab='', main='', yaxt='n')
@@ -221,6 +239,8 @@ for (win_id in sort(unique(win_sites$win_id)))
     {text(min(alleles$pos) + (i-1) / 10 * (max(alleles$pos) - min(alleles$pos)), nrow(samples) + 1, geno_types[i], col=allele_cols[i])}
       
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')
+
+  #colored boxes are also plotted on the left side to indicate what proportion of the alleles differ from SECH_3-sech_Anro_B3_TTAGGC_L001 (blue low, red high)
   if (sum(genes$win_id == win_id) > 0)
     {
     rect(genes$start[genes$win_id == win_id], -nrow(samples), genes$end[genes$win_id == win_id], 1.5*nrow(samples), col=adjustcolor('gray', .2), border=NA)

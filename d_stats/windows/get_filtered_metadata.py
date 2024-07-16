@@ -17,11 +17,13 @@ cur.execute("""create table sample_species
                 vcf_order int)""")
 
 
+#define short species names which will also serve as pop names
 short_species = {'melanogaster': 'mel', 
               'simulans': 'sim',
               'sechellia': 'sech',
               'sim_sech_hybrid': 'ssh',
               'mauritiana': 'mau'}
+
 
 #process existing metadata file
 species = {'D_MELANOGASTER': 'mel'}
@@ -30,8 +32,8 @@ with open(meta_in, 'r') as m:
   next(m)
   for line in m:
     line = line.strip()
-    sample, species, location, date = line.split("\t")
-    species[sample] = short_species[species]
+    sample, spec, location, date = line.split("\t")
+    species[sample] = short_species[spec]
     if location == '':
       location = 'Unknown'
     locations[sample] = location

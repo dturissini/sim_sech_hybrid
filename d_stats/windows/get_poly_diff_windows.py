@@ -8,7 +8,7 @@ import zarr
 import sqlite3
 
 
-
+#create poly_diff_win_table
 def create_windows_table(conn, win_size, poly_diff_win_table):
   cur = conn.cursor()    
   cur.execute(f"drop table if exists {poly_diff_win_table}")
@@ -34,7 +34,7 @@ def create_windows_table(conn, win_size, poly_diff_win_table):
 
 
 
-# Define a function to load genotyope and positions arrays.
+#define a function to load genotyope and positions arrays
 def load_callset_pos(chrom, zarr_file):
     # Load the vcf file.
     callset = zarr.open_group(zarr_file, mode='r')
@@ -45,7 +45,7 @@ def load_callset_pos(chrom, zarr_file):
     return geno, pos
 
 
-# Define a function to compute adjusted chromosome lengths.
+#define a function to compute adjusted chromosome lengths
 def chr_seq_len(window_size, chr_dicc):
     # Initialize new empty dictionary to store the output.
     new_chr_dicc = {}
@@ -60,7 +60,7 @@ def chr_seq_len(window_size, chr_dicc):
     return new_chr_dicc
 
 
-# Define a function to break up a chromosome into windows.
+#define a function to break a chromosome up into windows
 def window_info(positions, window_size, sequence_length):
     # Intialize a dicctionary with the start and stop position for each window.
     windows = {}
@@ -74,7 +74,7 @@ def window_info(positions, window_size, sequence_length):
 
 
 
-# Define a function to calculate alternative allele frequencies.
+#calculate alternative allele frequencies
 def calc_alt_freqs(gt):
     # If there are no altenative alleles...
     if (gt.count_alleles().shape[1] == 1):
@@ -87,6 +87,7 @@ def calc_alt_freqs(gt):
     return alt_freqs
 
 
+#calculate the difference for derived allele frequencies between two pops
 def calc_mean_der_freq_diff(gt_a, gt_b, outgroup_gt):
     # If there are no altenative alleles...
     if (gt_a.count_alleles().shape[1] == 1):
@@ -128,7 +129,7 @@ def calc_mean_der_freq_diff(gt_a, gt_b, outgroup_gt):
 
 
 
-# Define a function to calculate the dXY for a given locus.
+#calculate dxy for a given window
 def calc_dxy(gt, pop_x, pop_y):
     # Compute the allele frequencies.
     pop_x_freqs = calc_alt_freqs(gt=gt.take(pop_x, axis=1))
@@ -140,7 +141,7 @@ def calc_dxy(gt, pop_x, pop_y):
     return dxy
 
 
-# Define a function to calculate fst.
+#calculate Fst for a given window
 def calc_fst(gt, pop_a, pop_b):
     # Determine allele counts.
     a_ac = gt.take(pop_a, axis=1).count_alleles()
@@ -167,24 +168,24 @@ def main():
   
   create_windows_table(conn, win_size, poly_diff_win_table)
 
-  # Read in meta data as a pandas dataframe.
+  #make a pandas dataframe of metadata
   meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id""", conn)
   
-  pops = list(set(meta_df['pop']))
+  pops = list(set(meta_df['species']))
   pops.sort()
   
   
-  # Intialize pop dictionary.
+  #intialize a pop dictionary
   idx_dicc = {}
   for pop in pops:
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['species'] == pop]
   
   #remove outgroups from pop since we don't want to calculate polymorphism measures for it
   pops.remove(outgroup)
   
-  # Intialize a dictionary of chromosome lengths.
+  #intialize a dictionary of chromosome lengths
   chrom_query = conn.execute("""select chrom, chrom_len 
                                 from chrom_lens""")
   chromosome_dicc = {}
@@ -192,19 +193,17 @@ def main():
     chromosome_dicc[chrom] = chrom_len
       
       
-  # Compute the adjusted chromosome lengths for windowing.
+  #compute the adjusted chromosome lengths for windowing
   adj_chrom_dicc = chr_seq_len(win_size, chromosome_dicc)
   
-  # Intialize a dictionary to store the results.
-             
-  # For every chromosome.
+  #create a dictionary to store the results             
   pwd_id = 0
   sdf_id = 0
   for chrom in adj_chrom_dicc:
-      # Extract the genotype callset and positions.
+      #get the genotype callset and positions
       zarr_file = zarr_prefix + '_' + chrom + '.zarr'
       callset, all_pos = load_callset_pos(chrom, zarr_file)
-      # Construct the window dictionaries.
+      #make the window dictionaries
       wind_dicc, left_right = window_info(
           all_pos, win_size, adj_chrom_dicc[chrom],
       )
@@ -212,7 +211,7 @@ def main():
       for j, pop_b in enumerate(pops):
         for i in range(j):
           pop_a = pops[i]
-#          if not ('sech' in [pop_a, pop_b] and (pop_a in ['sechbase', 'sechden', 'sechpras'] or pop_b in ['sechbase', 'sechden', 'sechpras'])):
+          #don't calculate differences between subpopulations
           if pop_a[:4] != pop_b[:4]:
             print(chrom, pop_a, pop_b)
             df_dicc = {'win_id': [],
@@ -222,30 +221,27 @@ def main():
                        'num_sites': [],
                        'seg_sites': []}
             
-            # For every window.
             for wind in wind_dicc:
-                # Extract the left and right positions.
+                #extract the left and right boundaries of the window
                 left, right = left_right[wind]
-                # Determine the what sites are in this region.
+                #find the sites in this window
                 wind_idx = np.where(((left <= all_pos) & (all_pos <= right)))[0]
-                # If the window has at least one site.
+                #process the window
                 if wind_idx.size > 0:
-                    # Identify the window to extract.
+                    #get the window location
                     wind_loc = all_pos.locate_range(left, right)
-                    # Subset the genotype matrix.
+                    #subset the genotype matrix
                     sub_gt = allel.GenotypeArray(callset[wind_loc])
-                    # Determine which positions are segregating.
+                    #find polymorphic sites
                     var_mask = sub_gt.count_alleles().is_variant()
-                    # Fill the dictionary.
+                    #add to lists
                     df_dicc['win_id'].append(chrom + '_' + str(left))
                     df_dicc['chrom'].append(chrom)
                     df_dicc['start'].append(left)
                     df_dicc['end'].append(right)
                     df_dicc['num_sites'].append(wind_idx.size)
                     df_dicc['seg_sites'].append(var_mask.sum())
-                # Else, there are no sites in this window.
                 else:
-                    # Fill the dictionary.
                     df_dicc['win_id'].append(chrom + '_' + str(left))
                     df_dicc['chrom'].append(chrom)
                     df_dicc['start'].append(left)
@@ -254,17 +250,17 @@ def main():
                     df_dicc['seg_sites'].append(0)
             
             
-            # Convert the dictionary to a dataframe.
+            #convert the dictionary to a dataframe
             window_df = pd.DataFrame(df_dicc)  
             
-            # Extract ortholog information.
+            #make lists of window values
             win_ids = window_df.win_id.values
             chroms = window_df.chrom.values
             starts = window_df.start.values
             ends = window_df.end.values
             tot_sites = window_df.num_sites.values
             
-            
+            #make empty lists corresponding to database fields
             pwd_ids = []
             pop_as = []
             pop_bs = []
@@ -272,13 +268,13 @@ def main():
             dxys = []
             fsts = []
             
-            # For every ortholog window.
+            #get stats for each window
             for idx in range(window_df.shape[0]):
                 pwd_id += 1
                 pwd_ids.append(pwd_id)
                 pop_as.append(pop_a)
                 pop_bs.append(pop_b)
-                # Extract the ortholog information.
+                #extract the ortholog information
                 chrom = chroms[idx]
                 start = starts[idx]
                 end = ends[idx]
@@ -290,24 +286,22 @@ def main():
                   dxys.append(np.nan)
                   fsts.append(np.nan)
                 else:
-                  # Extract the genotype callset and positions.
+                  #extract the genotypes and positions
                   zarr_file = zarr_prefix + '_' + chrom + '.zarr'
                   callset, all_pos = load_callset_pos(chrom, zarr_file)
-                  # Identify the window to extract.
+                  #get the windows
                   wind_loc = all_pos.locate_range(start, end)
                   
                   win_gt = allel.GenotypeArray(callset[wind_loc])
                   
-                  # Compute derived allele freq difference
+                  #compute derived allele freq difference
                   der_freq_diff = calc_mean_der_freq_diff(gt_a=win_gt.take(idx_dicc[pop_a], axis=1), gt_b=win_gt.take(idx_dicc[pop_b], axis=1), outgroup_gt=win_gt.take(idx_dicc[outgroup], axis=1))
                           
-                  # Compute dxy
+                  #compute dxy
                   dxy = calc_dxy(gt=win_gt, pop_x=idx_dicc[pop_a], pop_y=idx_dicc[pop_b])
                   
-                  # Compute Fst
+                  #compute fst
                   fst = calc_fst(gt=win_gt, pop_a=idx_dicc[pop_a], pop_b=idx_dicc[pop_b])
-            
-            
             
                   der_freq_diffs.append(der_freq_diff)
                   dxys.append(dxy)

@@ -56,7 +56,7 @@ def load_callset_pos(chrom, zarr_file):
     return geno, pos
 
 
-
+# get derived allele counts for a given window
 def get_der_allele_counts(gt, outgroup_gt):
     total_alleles = gt.count_alleles().sum(axis=1)
     # If there are no altenative alleles...
@@ -93,10 +93,12 @@ def main():
 
   create_windows_table(conn, win_size, outlier_type, sites_table)  
 
+
   # Read in meta data as a pandas dataframe.
   meta_df = pd.read_sql(f"""select sample_id, species, location
                             from sample_species""", conn)
   
+  #define sql to identify outlier windows depending on the type of outlier we're looking for
   if outlier_type == 'd_plus':
     d_plus = pd.read_sql(f"""select d_plus
                              from {d_win_table}
@@ -126,7 +128,7 @@ def main():
                   where num_sites > 1000
                   order by random() limit 50"""
 
-
+  #populate the pandas dataframe from sqlite
   win_df = pd.read_sql(win_sql, conn)
   
   
@@ -134,16 +136,17 @@ def main():
   idx_pop_dicc = {}
   for pop in ['sim', 'ssh', 'sech', 'mel']:
       # Fill the dictionary.
-      idx_pop_dicc[pop] = meta_df[meta_df['pop'] == pop].index.values
+      idx_pop_dicc[pop] = meta_df[meta_df['species'] == pop].index.values
 
-      
+
+  #identify indices for sech samples by geographic location    
   idx_sech_loc_dicc = {}  
-  sech_locs = set(meta_df['location'][meta_df['pop'] == 'sech'] )
+  sech_locs = set(meta_df['location'][meta_df['species'] == 'sech'] )
   for sech_loc in sech_locs:
-    idx_sech_loc_dicc[sech_loc] = meta_df[(meta_df['pop'] == 'sech') & (meta_df['location'] == sech_loc)].index.values
+    idx_sech_loc_dicc[sech_loc] = meta_df[(meta_df['species'] == 'sech') & (meta_df['location'] == sech_loc)].index.values
       
   
-  
+  #define empty lists corresponding to database fields
   odwps_ids = []
   win_ids = []
   chroms = []
@@ -170,7 +173,7 @@ def main():
  
  
   
-  # For every outlier window
+  # calculate stats for every outlier window
   odwps_id = 0
   for idx in range(win_df.shape[0]):
       win_id = win_df.win_id.values[idx]
@@ -209,6 +212,7 @@ def main():
 
       mel_alleles.extend(win_gt.take(idx_pop_dicc['mel'], axis=1)[:, 0, 0])
       
+      #add values to lists
       total_sims.extend(total_sim)
       total_sshs.extend(total_ssh)
       total_sechs.extend(total_sech)
@@ -228,7 +232,8 @@ def main():
       der_sechs_marianne.extend(der_sech_marianne)
       der_sechs_praslin.extend(der_sech_praslin)
       der_sechs_unknown.extend(der_sech_unknown)
-           
+
+  #create dataframe using lists that can be loaded into the database table           
   site_df = pd.DataFrame()    
   #add columns to site_df
   site_df["odwps_id"] = odwps_ids  
@@ -257,7 +262,7 @@ def main():
 
   
   
-  #import window_df to db
+  #import site_df to db
   conn = sqlite3.connect(db_file)
   site_df.to_sql(sites_table, if_exists = 'append', index=False, con=conn)
   conn.commit()

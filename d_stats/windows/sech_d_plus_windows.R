@@ -1,8 +1,10 @@
 library("RSQLite")  
 library(colorRamps)
 
+#process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
 win_size <- args[1]
+
 
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
@@ -20,9 +22,12 @@ wins <- dbGetQuery(conn, paste("select *
                                 from ", d_stats_table, "
                                 where d_plus is not null", sep=''))
 
-
+#get unique chromosomes
 chroms <- sort(unique(wins$chrom))
+
+#set threhsold for number of called sites per window
 num_sites_cutoff <- as.numeric(win_size) / 50
+
 
 pdf(pdf_file, height=8, width=10.5)
 #hist of sites per window
