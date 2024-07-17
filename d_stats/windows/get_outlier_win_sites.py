@@ -95,8 +95,9 @@ def main():
 
 
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select sample_id, species, location
-                            from sample_species""", conn)
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+                            from sample_species s, sample_pop_link l
+                            where s.sample_id = l.sample_id""", conn)
   
   #define sql to identify outlier windows depending on the type of outlier we're looking for
   if outlier_type == 'd_plus':
@@ -132,18 +133,14 @@ def main():
   win_df = pd.read_sql(win_sql, conn)
   
   
+  #get outgroup
+  outgroup = pop_str.split('_')[3]
+
+
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop in ['sim', 'ssh', 'sech', 'mel']:
-      # Fill the dictionary.
-      idx_pop_dicc[pop] = meta_df[meta_df['species'] == pop].index.values
-
-
-  #identify indices for sech samples by geographic location    
-  idx_sech_loc_dicc = {}  
-  sech_locs = set(meta_df['location'][meta_df['species'] == 'sech'] )
-  for sech_loc in sech_locs:
-    idx_sech_loc_dicc[sech_loc] = meta_df[(meta_df['species'] == 'sech') & (meta_df['location'] == sech_loc)].index.values
+  for pop in list(set(meta_df['pop'])):
+    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
       
   
   #define empty lists corresponding to database fields
@@ -151,7 +148,7 @@ def main():
   win_ids = []
   chroms = []
   positions = []
-  mel_alleles = []
+  outgroup_alleles = []
   total_sims = []
   total_sshs = []
   total_sechs = []
@@ -190,16 +187,16 @@ def main():
       
 
       # Compute derived allele freq
-      total_sim, der_sim = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sim'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_ssh, der_ssh = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['ssh'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech, der_sech = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sech'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sim, der_sim = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sim'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_ssh, der_ssh = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['ssh'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech, der_sech = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sech'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
 
-      total_sech_anro, der_sech_anro = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Anro, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech_denis, der_sech_denis = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Denis, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech_ladigue, der_sech_ladigue = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['La Digue, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech_marianne, der_sech_marianne = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Marianne, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech_praslin, der_sech_praslin = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Praslin, Seychelles'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
-      total_sech_unknown, der_sech_unknown = get_der_allele_counts(gt=win_gt.take(idx_sech_loc_dicc['Unknown'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1))
+      total_sech_anro, der_sech_anro = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechanro'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech_denis, der_sech_denis = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechden'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech_ladigue, der_sech_ladigue = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechlad'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech_marianne, der_sech_marianne = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechmari'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech_praslin, der_sech_praslin = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechpras'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_sech_unknown, der_sech_unknown = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['sechunk'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
 
  
       for pos in all_pos[wind_loc]:
@@ -210,7 +207,7 @@ def main():
         positions.append(pos)
         
 
-      mel_alleles.extend(win_gt.take(idx_pop_dicc['mel'], axis=1)[:, 0, 0])
+      outgroup_alleles.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
       
       #add values to lists
       total_sims.extend(total_sim)
@@ -240,7 +237,7 @@ def main():
   site_df["win_id"] = win_ids  
   site_df["chrom"] = chroms  
   site_df["pos"] = positions
-  site_df["mel_allele"] = mel_alleles
+  site_df["mel_allele"] = outgroup_alleles
   site_df["total_alleles_sim"] = total_sims
   site_df["total_alleles_ssh"] = total_sshs
   site_df["total_alleles_sech"] = total_sechs
