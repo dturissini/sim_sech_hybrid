@@ -96,17 +96,17 @@ def main():
   create_windows_table(conn, win_size, dxy_win_table)  
 
   #make a pandas dataframe with metadata
-  meta_df = pd.read_sql(f"""select sample_id, species, location
-                            from sample_species""", conn)
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+                            from sample_species s, sample_pop_link l
+                            where s.sample_id = l.sample_id""", conn)
   
   #idenfity the indices for the samples of interest
-  focal_sample_ids = meta_df['sample_id'][((meta_df['species'] == 'sech') & (meta_df['location'].isin(['Denis, Seychelles', 'La Digue, Seychelles', 'Marianne, Seychelles', 'Praslin, Seychelles']))) | (meta_df['species'] == 'ssh')]
+  focal_sample_ids = meta_df['sample_id'][meta_df['pop'] in ['sech', 'sechden', 'sechlad', 'sechmari', 'sechpras', 'ssh']]
   
   #intialize dictionary with pop indices
-  idx_dicc = {}
-  idx_dicc['sech_anro'] = meta_df[(meta_df['species'] == 'sech') & (meta_df['location'] == 'Anro, Seychelles')].index.values
-  for sample_id in focal_sample_ids:
-    idx_dicc[sample_id] = meta_df[meta_df['sample_id'] == sample_id].index.values
+  idx_pop_dicc = {}
+  for pop in list(set(meta_df['pop'])):
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
     
       
 

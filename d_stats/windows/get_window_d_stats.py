@@ -44,7 +44,7 @@ def load_callset_pos(chrom, zarr_file):
 def chr_seq_len(window_size, chr_dicc):
     new_chr_dicc = {}
     for key in chr_dicc :
-         chr_len = chr_dicc[key]
+        chr_len = chr_dicc[key]
         new_chr_len = (chr_len//window_size)*window_size
         new_chr_dicc[key] = new_chr_len
     return new_chr_dicc
@@ -172,9 +172,9 @@ def main():
                             and l.pop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
   
   #intialize the pop dictionary
-  idx_dicc = {}
-  for pop in [p1, p2, p3, p4]:
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['species'] == pop]
+  idx_pop_dicc = {}
+  for pop in list(set(meta_df['pop'])):
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
 
   
   #intialize a dictionary of chromosome lengths
@@ -214,7 +214,7 @@ def main():
               wind_loc = all_pos.locate_range(left, right)
               sub_gt = allel.GenotypeArray(callset[wind_loc])
               var_mask = sub_gt.count_alleles().is_variant()
-               df_dicc['win_id'].append(chrom + '_' + str(left))
+              df_dicc['win_id'].append(chrom + '_' + str(left))
               df_dicc['chrom'].append(chrom)
               df_dicc['start'].append(left)
               df_dicc['end'].append(right)

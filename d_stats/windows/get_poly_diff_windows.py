@@ -173,14 +173,14 @@ def main():
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id""", conn)
   
-  pops = list(set(meta_df['species']))
+  pops = list(set(meta_df['pop']))
   pops.sort()
   
   
   #intialize a pop dictionary
-  idx_dicc = {}
-  for pop in pops:
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['species'] == pop]
+  idx_pop_dicc = {}
+  for pop in list(set(meta_df['pop'])):
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
   
   #remove outgroups from pop since we don't want to calculate polymorphism measures for it
   pops.remove(outgroup)

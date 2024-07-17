@@ -65,8 +65,9 @@ def main():
   
   
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select sample_id, species, location
-                            from sample_species""", conn)
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+                            from sample_species s, sample_pop_link l
+                            where s.sample_id = l.sample_id""", conn)
 
   outlier_sql = f"""select win_id, chrom, start, end
                     from {d_win_table}
@@ -75,11 +76,14 @@ def main():
   outlier_win_df = pd.read_sql(outlier_sql, conn)
   
   
+  #get outgroup
+  outgroup = pop_str.split('_')[3]
+  
+  
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop_i in ['sim', 'ssh', 'sech', 'mel']:
-      # Fill the dictionary.
-      idx_pop_dicc[pop_i] = meta_df[meta_df['species'] == pop_i].index.values
+  for pop in list(set(meta_df['pop'])):
+    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
 
       
   
@@ -102,9 +106,9 @@ def main():
       
       
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
-      outgroup_gt=win_gt.take(idx_pop_dicc['mel'], axis=1)
+      outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1)
       
-      sample_ids = list(meta_df['sample_id'][meta_df['species'] == pop])
+      sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
       
       
       
