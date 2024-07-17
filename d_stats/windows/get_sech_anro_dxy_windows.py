@@ -106,7 +106,7 @@ def main():
   #intialize dictionary with pop indices
   idx_pop_dicc = {}
   for pop in list(set(meta_df['pop'])):
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
     
       
 
@@ -207,7 +207,7 @@ def main():
                   
     
           #compute dxy
-          dxy_sech_anro = calc_dxy(gt=win_gt, pop_x=idx_dicc['sech_anro'], pop_y=idx_dicc[sample_id])
+          dxy_sech_anro = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc['sech_anro'], pop_y=idx_pop_dicc[sample_id])
     
           dxy_sech_anros.append(dxy_sech_anro)                                                 
              

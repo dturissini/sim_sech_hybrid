@@ -163,7 +163,7 @@ def main():
   #intialize pop dictionary
   idx_pop_dicc = {}
   for pop in list(set(meta_df['pop'])):
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
   
   #remove outgroups from pop since we don't want to calculate polymorphism measures for a single sample
   pops.remove(outgroup)
@@ -266,10 +266,10 @@ def main():
               win_gt = allel.GenotypeArray(callset[wind_loc])
               
               #compute derived allele freq
-              der_freq, sfs[pop] = calc_mean_der_freq(gt=win_gt.take(idx_dicc[pop], axis=1), outgroup_gt=win_gt.take(idx_dicc[outgroup], axis=1), sfs_win=sfs[pop])
+              der_freq, sfs[pop] = calc_mean_der_freq(gt=win_gt.take(idx_pop_dicc[pop], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1), sfs_win=sfs[pop])
                       
               #compute pi
-              pi = pixy(gt=win_gt, pop_idx=idx_dicc[pop])
+              pi = pixy(gt=win_gt, pop_idx=idx_pop_dicc[pop])
         
               der_freqs.append(der_freq)
               pis.append(pi)

@@ -180,7 +180,7 @@ def main():
   #intialize a pop dictionary
   idx_pop_dicc = {}
   for pop in list(set(meta_df['pop'])):
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
   
   #remove outgroups from pop since we don't want to calculate polymorphism measures for it
   pops.remove(outgroup)
@@ -295,13 +295,13 @@ def main():
                   win_gt = allel.GenotypeArray(callset[wind_loc])
                   
                   #compute derived allele freq difference
-                  der_freq_diff = calc_mean_der_freq_diff(gt_a=win_gt.take(idx_dicc[pop_a], axis=1), gt_b=win_gt.take(idx_dicc[pop_b], axis=1), outgroup_gt=win_gt.take(idx_dicc[outgroup], axis=1))
+                  der_freq_diff = calc_mean_der_freq_diff(gt_a=win_gt.take(idx_pop_dicc[pop_a], axis=1), gt_b=win_gt.take(idx_pop_dicc[pop_b], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
                           
                   #compute dxy
-                  dxy = calc_dxy(gt=win_gt, pop_x=idx_dicc[pop_a], pop_y=idx_dicc[pop_b])
+                  dxy = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc[pop_a], pop_y=idx_pop_dicc[pop_b])
                   
                   #compute fst
-                  fst = calc_fst(gt=win_gt, pop_a=idx_dicc[pop_a], pop_b=idx_dicc[pop_b])
+                  fst = calc_fst(gt=win_gt, pop_a=idx_pop_dicc[pop_a], pop_b=idx_pop_dicc[pop_b])
             
                   der_freq_diffs.append(der_freq_diff)
                   dxys.append(dxy)

@@ -174,7 +174,7 @@ def main():
   #intialize the pop dictionary
   idx_pop_dicc = {}
   for pop in list(set(meta_df['pop'])):
-    idx_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
 
   
   #intialize a dictionary of chromosome lengths
@@ -269,8 +269,8 @@ def main():
         callset, all_pos = load_callset_pos(chrom, zarr_file)
         wind_loc = all_pos.locate_range(start, end)
         abba, baba, baaa, abaa = dros_site_patterns(gt=allel.GenotypeArray(callset[wind_loc]),
-                                                    p1_idx=idx_dicc[p1], p2_idx=idx_dicc[p2],
-                                                    p3_idx=idx_dicc[p3], p4_idx=idx_dicc[p4],
+                                                    p1_idx=idx_pop_dicc[p1], p2_idx=idx_pop_dicc[p2],
+                                                    p3_idx=idx_pop_dicc[p3], p4_idx=idx_pop_dicc[p4],
                                                     )
         abbas.append(abba)
         babas.append(baba)
