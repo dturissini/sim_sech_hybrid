@@ -102,9 +102,12 @@ def main():
   
   #idenfity the indices for the samples of interest
   focal_pops = list(set(meta_df['pop']))
-  focal_pops.remove(outgroup)
+  focal_pops.remove('mel')
+  focal_pops.remove('sechanro')
   
-  focal_sample_ids = meta_df['sample_id'][meta_df['pop'] in focal_pops]
+  focal_sample_ids = meta_df['sample_id'][[i in set(focal_pops) for i in meta_df['pop']]]
+  
+  
   
   #intialize dictionary with pop indices
   idx_pop_dicc = {}
@@ -112,7 +115,11 @@ def main():
     idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
     
       
-
+ #intialize dictionary with sample indices
+  idx_sample_dicc = {}
+  for sample_id in focal_sample_ids:
+    idx_sample_dicc[sample_id] = meta_df['vcf_order'][meta_df['sample_id'] == sample_id]
+    
   
   #make a dictionary of chromosome lengths
   chrom_query = conn.execute("""select chrom, chrom_len 
@@ -210,7 +217,7 @@ def main():
                   
     
           #compute dxy
-          dxy_sech_anro = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc['sech_anro'], pop_y=idx_pop_dicc[sample_id])
+          dxy_sech_anro = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc['sechanro'], pop_y=idx_sample_dicc[sample_id])
     
           dxy_sech_anros.append(dxy_sech_anro)                                                 
              
