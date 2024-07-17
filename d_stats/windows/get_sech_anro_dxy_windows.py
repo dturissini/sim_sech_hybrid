@@ -108,8 +108,8 @@ def main():
   
   #intialize dictionary with pop indices
   idx_pop_dicc = {}
-  for pop in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+  for pop_i in list(set(meta_df['pop'])):
+    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
     
       
 

@@ -18,6 +18,7 @@ def main():
   
   #create adj_allele_dist_table table
   cur = conn.cursor()    
+  if ssh_table_exists:
   cur.execute(f"drop table if exists {adj_allele_dist_table}")
   cur.execute(f"""create table {adj_allele_dist_table}
                   (aad_id int primary key,
@@ -57,6 +58,7 @@ def main():
                     and a2.num_der_alleles != -2
                     and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
                     group by a.win_id, a.sample_id""")
+                    
 
   conn.commit()
    

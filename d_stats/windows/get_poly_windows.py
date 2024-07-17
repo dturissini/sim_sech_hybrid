@@ -162,8 +162,8 @@ def main():
   
   #intialize pop dictionary
   idx_pop_dicc = {}
-  for pop in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+  for pop_i in list(set(meta_df['pop'])):
+    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
   
   #remove outgroups from pop since we don't want to calculate polymorphism measures for a single sample
   pops.remove(outgroup)
@@ -183,8 +183,8 @@ def main():
   pw_id = 0
   sdf_id = 0
   sfs= {}
-  for pop in pops:
-    sfs[pop] = {}
+  for pop_i in pops:
+    sfs[pop_i] = {}
     
   for chrom in adj_chrom_dicc:
       #extract genotype callset and positions
@@ -195,7 +195,7 @@ def main():
           all_pos, win_size, adj_chrom_dicc[chrom],
       )
       
-      for pop in pops:
+      for pop_i in pops:
         print(chrom, pop)
         df_dicc = {'win_id': [],
                    'chrom': [],
@@ -249,7 +249,7 @@ def main():
         for idx in range(window_df.shape[0]):
             pw_id += 1
             pw_ids.append(pw_id)
-            table_pops.append(pop)
+            table_pops.append(pop_i)
             chrom = chroms[idx]
             start = starts[idx]
             end = ends[idx]
@@ -266,10 +266,10 @@ def main():
               win_gt = allel.GenotypeArray(callset[wind_loc])
               
               #compute derived allele freq
-              der_freq, sfs[pop] = calc_mean_der_freq(gt=win_gt.take(idx_pop_dicc[pop], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1), sfs_win=sfs[pop])
+              der_freq, sfs[pop_i] = calc_mean_der_freq(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1), sfs_win=sfs[pop_i])
                       
               #compute pi
-              pi = pixy(gt=win_gt, pop_idx=idx_pop_dicc[pop])
+              pi = pixy(gt=win_gt, pop_idx=idx_pop_dicc[pop_i])
         
               der_freqs.append(der_freq)
               pis.append(pi)
@@ -289,12 +289,12 @@ def main():
  
   
   #add site frequency specturm counts to db table
-  for pop in sfs:      
-    for freq in sfs[pop]:
+  for pop_i in sfs:      
+    for freq in sfs[pop_i]:
       sdf_id += 1
       conn.execute(f"""insert into {sfs_table}
                        values
-                       ({sdf_id}, '{pop}', {freq}, {sfs[pop][freq]})""")
+                       ({sdf_id}, '{pop_i}', {freq}, {sfs[pop_i][freq]})""")
         
   conn.commit()
   conn.close()

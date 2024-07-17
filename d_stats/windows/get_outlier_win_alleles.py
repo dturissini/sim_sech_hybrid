@@ -71,7 +71,7 @@ def main():
 
   outlier_sql = f"""select win_id, chrom, start, end
                     from {d_win_table}
-                    where win_id in (select win_id from {sites_table})"""
+                    where win_id in (select distinct win_id from {sites_table})"""
                     
   outlier_win_df = pd.read_sql(outlier_sql, conn)
   
@@ -82,12 +82,12 @@ def main():
   
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+  for pop_i in list(set(meta_df['pop'])):
+    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
 
-      
   
   # Get alleles for the user provided pop for every outlier window 
+  sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
   odwsa_id = 0
   with tempfile.NamedTemporaryFile(mode='w') as t:
     for idx in range(outlier_win_df.shape[0]):
@@ -107,10 +107,6 @@ def main():
       
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
       outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1)
-      
-      sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
-      
-      
       
       total_alleles = pop_gt.count_alleles().sum(axis=1)
       # If there are no altenative alleles...

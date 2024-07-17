@@ -97,18 +97,18 @@ def main():
                   where num_sites > 1000
                   and (d_plus > {d_plus_quantiles[1]} or d_plus < {d_plus_quantiles[0]})"""
   elif outlier_type[:2] == 'pi':
-    pop = outlier_type.split('_')[1]
+    pi_pop = outlier_type.split('_')[1]
     pi = pd.read_sql(f"""select pi
                          from {poly_win_table}
                          where num_sites > 1000
-                         and pop = '{pop}'""", conn)
+                         and pop = '{pi_pop}'""", conn)
       
     pi_quantile = np.quantile(pi['pi'], .99)
     win_sql = f"""select win_id, chrom, start, end
                  from {poly_win_table}
                  where num_sites > 1000
                  and pi > {pi_quantile}
-                 and pop = '{pop}'"""
+                 and pop = '{pi_pop}'"""
   elif outlier_type == 'random':
     win_sql = f"""select win_id, chrom, start, end
                   from {d_win_table}
@@ -125,8 +125,8 @@ def main():
   
   # Intialize pop dictionary.
   idx_pop_dicc = {}
-  for pop in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop] = meta_df['vcf_order'][meta_df['pop'] == pop]
+  for pop_i in list(set(meta_df['pop'])):
+    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
       
   focal_pops = list(set(meta_df['pop']))
   focal_pops.remove(outgroup)
@@ -148,7 +148,7 @@ def main():
     wind_loc = all_pos.locate_range(start, end)
     win_gt = allel.GenotypeArray(callset[wind_loc])
     
-    for pop in focal_pops:
+    for pop_i in focal_pops:
       #define empty lists corresponding to database fields
       odwps_ids = []
       win_ids = []
@@ -161,7 +161,7 @@ def main():
 
     
       # Compute derived allele freq
-      total_alleles, der_alleles = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_alleles, der_alleles = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
       
       #get outgroup alleles
       outgroup_alleles.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
@@ -172,7 +172,7 @@ def main():
         win_ids.append(win_id)
         chroms.append(chrom)
         positions.append(pos)
-        pops.append(pop)
+        pops.append(pop_i)
         
       #create dataframe using lists that can be loaded into the database table           
       site_df = pd.DataFrame()    
