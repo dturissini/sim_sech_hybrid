@@ -101,7 +101,10 @@ def main():
                             where s.sample_id = l.sample_id""", conn)
   
   #idenfity the indices for the samples of interest
-  focal_sample_ids = meta_df['sample_id'][meta_df['pop'] in ['sech', 'sechden', 'sechlad', 'sechmari', 'sechpras', 'ssh']]
+  focal_pops = list(set(meta_df['pop']))
+  focal_pops.remove(outgroup)
+  
+  focal_sample_ids = meta_df['sample_id'][meta_df['pop'] in focal_pops]
   
   #intialize dictionary with pop indices
   idx_pop_dicc = {}
