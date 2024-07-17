@@ -232,7 +232,7 @@ def main():
         #convert dictionary to a dataframe
         window_df = pd.DataFrame(df_dicc)  
         
-        make lists of window values
+        #make lists of window values
         win_ids = window_df.win_id.values
         chroms = window_df.chrom.values
         starts = window_df.start.values
