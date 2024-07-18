@@ -16,7 +16,7 @@ pdf_file <- paste('ssh_outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_st
 setwd(base_dir)
 
 
-make #db connection
+#make db connection
 conn <- dbConnect(dbDriver("SQLite"), db_file)
 
 
