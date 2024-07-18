@@ -41,13 +41,11 @@ d_wins <- dbGetQuery(conn, paste("select *
                                   from ", d_stats_table, "
                                   where d_plus is not null", sep=''))
 
-win_sites <- dbGetQuery(conn, paste("select *, 
-                                     der_alleles_sim / total_alleles_sim der_freq_sim,
-                                     der_alleles_ssh / total_alleles_ssh der_freq_ssh,
-                                     der_alleles_sech / total_alleles_sech der_freq_sech 
+win_sites <- dbGetQuery(conn, paste("select *
                                      from ", win_site_table, "
-                                     where 1.0 * der_alleles_sech / total_alleles_sech > 0
-                                     and 1.0* der_alleles_sech / total_alleles_sech < 1 
+                                     where 1.0 * der_alleles / total_alleles > 0
+                                     and 1.0* der_alleles / total_alleles < 1 
+                                     and pop = 'sech'
                                      order by chrom, pos", sep=''))
 
 
@@ -155,7 +153,7 @@ for (win_id in sort(unique(win_sites$win_id)))
   cat(win_id, as.character(Sys.time()), "\n")
   #scatterplot of sech freqs
   par(mar=c(0, 10.1, 4.1, 1.1))
-  plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles_sech[win_sites$win_id == win_id] / win_sites$total_alleles_sech[win_sites$win_id == win_id], pch=20, col='red', xaxt='n', ylim=c(0,1), ylab='Derived freq', main='')
+  plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles[win_sites$win_id == win_id] / win_sites$total_alleles[win_sites$win_id == win_id], pch=20, col='red', xaxt='n', ylim=c(0,1), ylab='Derived freq', main='')
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')
 
   mtext(paste('D+ = ', round(d_wins$d_plus[d_wins$win_id == win_id], 2), sep=''), 0, cex=.7, side=3, line=2, at=min(win_sites$pos[win_sites$win_id == win_id]) - .18 * (max(win_sites$pos[win_sites$win_id == win_id]) - min(win_sites$pos[win_sites$win_id == win_id])), adj=0)

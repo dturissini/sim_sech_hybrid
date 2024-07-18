@@ -29,6 +29,7 @@ d_stats_table <- paste('d_stat_win_', win_size, '_', pop_str, sep='')
 win_site_table <- paste('outlier_d_plus_win_sites_', win_size, '_', pop_str, sep='')
 allele_table_sech <- paste('outlier_d_plus_win_alleles_sech_', win_size, '_', pop_str, sep='')
 allele_table_ssh <- paste('outlier_d_plus_win_alleles_ssh_', win_size, '_', pop_str, sep='')
+allele_dist_table <- paste('outlier_d_plus_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
 
 #define pop str to use in db queries
@@ -41,13 +42,11 @@ d_wins <- dbGetQuery(conn, paste("select *
                                   from ", d_stats_table, "
                                   where d_plus is not null", sep=''))
 
-win_sites <- dbGetQuery(conn, paste("select *, 
-                                     der_alleles_sim / total_alleles_sim der_freq_sim,
-                                     der_alleles_ssh / total_alleles_ssh der_freq_ssh,
-                                     der_alleles_sech / total_alleles_sech der_freq_sech 
+win_sites <- dbGetQuery(conn, paste("select *
                                      from ", win_site_table, "
-                                     where 1.0 * der_alleles_sech / total_alleles_sech > 0
-                                     and 1.0* der_alleles_sech / total_alleles_sech < 1 
+                                     where 1.0 * der_alleles / total_alleles > 0
+                                     and 1.0* der_alleles / total_alleles < 1 
+                                     and pop = 'sech'
                                      order by chrom, pos", sep=''))
 
 
@@ -156,7 +155,7 @@ for (win_id in sort(unique(win_sites$win_id)))
   cat(win_id, as.character(Sys.time()), "\n")
   #ssh freqs
   par(mar=c(0, 10.1, 4.1, 1.1))
-  plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles_sech[win_sites$win_id == win_id] / win_sites$total_alleles_sech[win_sites$win_id == win_id], pch=20, col='red', xaxt='n', ylim=c(0,1), ylab='Der sech freq', main='')
+  plot(win_sites$pos[win_sites$win_id == win_id], win_sites$der_alleles[win_sites$win_id == win_id] / win_sites$total_alleles[win_sites$win_id == win_id], pch=20, col='red', xaxt='n', ylim=c(0,1), ylab='Der sech freq', main='')
   abline(v=gwas_pos$pos[gwas_pos$win_id == win_id], col='black')
 
   mtext(paste('D+ = ', round(d_wins$d_plus[d_wins$win_id == win_id], 2), sep=''), 0, cex=.7, side=3, line=2, at=min(win_sites$pos[win_sites$win_id == win_id]) - .18 * (max(win_sites$pos[win_sites$win_id == win_id]) - min(win_sites$pos[win_sites$win_id == win_id])), adj=0)
@@ -193,31 +192,13 @@ for (win_id in sort(unique(win_sites$win_id)))
                                      and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
                                      order by a.pos, a.sample_id", sep=''))
   
-  adj_allele_dist <- dbGetQuery(conn, paste("select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_sech, " a, ", allele_table_sech, " a2, sample_pop_link l
-                                             where a.win_id = '", win_id, "'
-                                             and a.win_id = a2.win_id
-                                             and a.pos = a2.pos
+  adj_allele_dist <- dbGetQuery(conn, paste("select a.sample_id, round(adj_allele_dist) + 1 adj_dist
+                                             from ", allele_dist_table, " a, sample_pop_link l
+                                             where win_id = '", win_id, "'
                                              and a.sample_id = l.sample_id
                                              and pop in (", pop_sql_str, ")
-                                             and a.num_der_alleles != -2
-                                             and a2.num_der_alleles != -2
-                                             and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
-                                             group by pop, a.sample_id
-                                             union all
-                                             select pop, a.sample_id, 1 + round(100 * (sum(abs(a2.num_der_alleles - a.num_der_alleles))) / count(*) / 2, 0) adj_dist
-                                             from ", allele_table_ssh, " a, ", allele_table_sech, " a2, sample_pop_link l
-                                             where a.win_id = '", win_id, "'
-                                             and a.win_id = a2.win_id
-                                             and a.pos = a2.pos
-                                             and a.sample_id = l.sample_id
-                                             and pop in (", pop_sql_str, ")
-                                             and a.num_der_alleles != -2
-                                             and a2.num_der_alleles != -2
-                                             and a2.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
-                                             group by pop, a.sample_id
-                                             order by pop, a.sample_id", sep=''))
-  
+                                             order by l.pop, a.sample_id", sep=''))
+
   
   axis_cols <- merge(sech_ssh_pops, samples, by = 'pop')
   dist_cols <- matlab.like(101)
