@@ -11,7 +11,7 @@ pop_str <- as.character(args[2])
 #define file paths
 base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
-pdf_file <- paste('ssh_outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_str, '.pdf', sep='')
+pdf_file <- paste('outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_str, '.pdf', sep='')
 
 setwd(base_dir)
 

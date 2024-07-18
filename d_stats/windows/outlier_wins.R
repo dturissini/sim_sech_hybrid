@@ -14,7 +14,7 @@ base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 gwas_snp_db_file <- '/proj/matutelb/projects/gwas/gwas_results/sech_oa_only_sim_pca/results/sech_oa_only_sim_pca_snp.db'
 anno_db_file <-  paste('/proj/matutelb/projects/gwas/genotype_datasets/sech_oa/sech_oa_anno.db', sep='')
-pdf_file <- paste('ssh_outlier_win_', outlier_type, '_', win_size, '_', pop_str, '.pdf', sep='')
+pdf_file <- paste('outlier_win_', outlier_type, '_', win_size, '_', pop_str, '.pdf', sep='')
 orthodb_file <-  '/proj/matutelb/projects/gwas/orthodb/odb11v0_subsetted_sim_mel.db'
 mel_species_id <- '7227_0'
 
