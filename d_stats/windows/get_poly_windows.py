@@ -196,7 +196,7 @@ def main():
       )
       
       for pop_i in pops:
-        print(chrom, pop)
+        print(chrom, pop_i)
         df_dicc = {'win_id': [],
                    'chrom': [],
                    'start': [],
