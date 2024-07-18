@@ -73,7 +73,7 @@ sqlite3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats
 
 
 #get window D statistics for sim_ssh_sech_mel using all sech samples
-python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sim \
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_d_stat_windows.py sim \
                                                                                                        ssh \
                                                                                                        sech \
                                                                                                        mel \
@@ -84,7 +84,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 #get window D statistics for sim_ssh_sechbase_mel using only sech samples from Anro, La Digue, and Marianne
-python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sim \
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_d_stat_windows.py sim \
                                                                                                        ssh \
                                                                                                        sechbase \
                                                                                                        mel \
@@ -95,7 +95,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 #get window D statistics for sim_ssh_sechpras_mel using only sech samples from Praslin
-python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sim \
+python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_d_stat_windows.py sim \
                                                                                                        ssh \
                                                                                                        sechpras \
                                                                                                        mel \
@@ -105,9 +105,9 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        
                                                                                                                                                                                                               
 #create pdf reports for D statistic windows                                                                                                       
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sim_ssh_sechbase_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sim_ssh_sechpras_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/d_plus_windows.R 50000 sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/d_plus_windows.R 50000 sim_ssh_sechbase_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/d_plus_windows.R 50000 sim_ssh_sechpras_mel
 
 
 
@@ -129,9 +129,9 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 #create pdfs containing plots showing polymorphism, D statistic, and divergence stats across the genome
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sim_ssh_sechbase_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sim_ssh_sechpras_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/poly_windows.R 50000 sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/poly_windows.R 50000 sim_ssh_sechbase_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/poly_windows.R 50000 sim_ssh_sechpras_mel
 
 
 
@@ -158,9 +158,9 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 #make plots for each outlier window showing the derived allele frequencies for simulans, sechellia, and sim_sech_hybrids
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_wins.R 50000 d_plus sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_wins.R 50000 random sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_wins.R 50000 pi_sech sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_wins.R 50000 d_plus sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_wins.R 50000 random sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_wins.R 50000 pi_sech sim_ssh_sech_mel
 
 
 
@@ -238,9 +238,9 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 #plot the alleles for each sample for outlier windows.
 #Alleles are colored by whether they have a sech anro allele or not using SECH_3-sech_Anro_B3_TTAGGC_L001 as the reference for polarizing alleles.
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_alleles.R 50000 d_plus sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_alleles.R 50000 random sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_alleles.R 50000 pi_sech sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_sech_alleles.R 50000 d_plus sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_sech_alleles.R 50000 random sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_sech_alleles.R 50000 pi_sech sim_ssh_sech_mel
 
 
 
@@ -248,7 +248,7 @@ Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_pi_sech_win_adj_allele_dists.R 50000 sim_ssh_sech_mel
-Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_outlier_sech_ssh_alleles.R 50000 sim_ssh_sech_mel
+Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/outlier_sech_ssh_alleles.R 50000 sim_ssh_sech_mel
 
 
 #Calculate dxy between samples and sech anro for windows
