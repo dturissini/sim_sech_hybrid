@@ -1,4 +1,5 @@
 #d_stat wins
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Praslin as the non-recipient
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechpras \
                                                                                                        sechbase \
                                                                                                        sim \
@@ -9,6 +10,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        
 
 
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Denis as the non-recipient
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechden \
                                                                                                        sechbase \
                                                                                                        sim \
@@ -17,6 +19,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
                                                                                                        /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
                                                                                                        
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Denis and Praslin as the non-recipient
 python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechdepr \
                                                                                                        sechbase \
                                                                                                        sim \
@@ -26,6 +29,7 @@ python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
                                                                                                        /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
                                                                                                        
 
+#create pdf reports for D statistic windows                                                                                                       
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sechpras_sechbase_sim_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sechden_sechbase_sim_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_d_plus_windows.R 50000 sechdepr_sechbase_sim_mel
@@ -33,25 +37,13 @@ Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts
 
 
 
+#create pdfs containing plots showing polymorphism, D statistic, and divergence stats across the genome
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sechpras_sechbase_sim_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sechden_sechbase_sim_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows.R 50000 sechdepr_sechbase_sim_mel
 
 
 
-#comp
+#generate comp report pdfs that show trace reports across each chromosome for AB counts and D+ for each of the two provided sets of four ABBA-BABA populations as well as pi for the two sech populations as well as all sech samples
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows_comp.R 50000 sim_ssh_sech_mel sechpras_sechbase_sim_mel
 Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/ssh_poly_windows_comp.R 50000 sim_ssh_sech_mel sechdepr_sechbase_sim_mel
-
-#old
-##python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/get_window_d_stats.py sechellia \
-##                                                                                                       sechellia_denis \
-##                                                                                                       simulans \
-##                                                                                                       melanogaster \
-##                                                                                                       50000 \
-##                                                                                                       sech_base_vs_denis
-##                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel \
-##                                                                                                       /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/sech_denis_d_win.db
-                                                                                                       
-
-##Rscript /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/sech_denis_d_plus_windows.R 50000
