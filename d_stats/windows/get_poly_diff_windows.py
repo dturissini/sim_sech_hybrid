@@ -167,11 +167,16 @@ def main():
   poly_diff_win_table = "poly_diff_win_" + str(win_size)
   
   create_windows_table(conn, win_size, poly_diff_win_table)
-
+  
+  #to limit pairwise comparisons, only use species level pops
+  #the list can be expanded in the future to include smaller pops if necessary
+  pop_sql_str = "'sim', 'sech', 'ssh'"
+  
   #make a pandas dataframe of metadata
   meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
                             from sample_species s, sample_pop_link l
-                            where s.sample_id = l.sample_id""", conn)
+                            where s.sample_id = l.sample_id
+                            and l.pop in ({pop_sql_str})""", conn)
   
   pops = list(set(meta_df['pop']))
   pops.sort()
@@ -211,8 +216,8 @@ def main():
       for j, pop_b in enumerate(pops):
         for i in range(j):
           pop_a = pops[i]
-          #don't calculate differences between subpopulations
-          if pop_a[:4] != pop_b[:4]:
+          #don't calculate differences between pops of the same species
+          if pop_a[:3] != pop_b[:3]:
             print(chrom, pop_a, pop_b)
             df_dicc = {'win_id': [],
                        'chrom': [],
