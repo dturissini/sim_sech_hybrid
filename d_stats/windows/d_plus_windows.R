@@ -1,5 +1,4 @@
 library("RSQLite")  
-library(colorRamps)
 
 
 #process command line arguments
