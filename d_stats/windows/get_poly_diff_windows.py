@@ -187,9 +187,7 @@ def main():
   for pop_i in list(set(meta_df['pop'])):
     idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
   
-  #remove outgroups from pop since we don't want to calculate polymorphism measures for it
-  pops.remove(outgroup)
-  
+    
   #intialize a dictionary of chromosome lengths
   chrom_query = conn.execute("""select chrom, chrom_len 
                                 from chrom_lens""")
