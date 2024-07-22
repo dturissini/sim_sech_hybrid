@@ -1,4 +1,5 @@
 library("RSQLite")  
+library(colorRamps)
 
 #process command line arguments
 args <- commandArgs(trailingOnly = TRUE)
