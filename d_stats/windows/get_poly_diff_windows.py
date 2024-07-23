@@ -170,18 +170,23 @@ def main():
   
   #to limit pairwise comparisons, only use species level pops
   #the list can be expanded in the future to include smaller pops if necessary
-  pop_sql_str = "'sim', 'sech', 'ssh'"
+  pop_sql_str = "'sim', 'sech', 'ssh', 'mel', 'sechpras', 'sechbase', 'sechden', 'sechdepr'"
+  
+  #define specific pop pairs to compare
+  #since we're only interested in a small subset of all possible pairs, these are manually specified for efficiency
+  pop_comps = [['sech', 'sim'],
+               ['sech', 'ssh'],
+               ['sim', 'ssh'],
+               ['sechbase', 'sechpras'],
+               ['sechbase', 'sechden'],
+               ['sechbase', 'sechdepr']]
   
   #make a pandas dataframe of metadata
   meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id
                             and l.pop in ({pop_sql_str})""", conn)
-  
-  pops = list(set(meta_df['pop']))
-  pops.sort()
-  
-  
+    
   #intialize a pop dictionary
   idx_pop_dicc = {}
   for pop_i in list(set(meta_df['pop'])):
@@ -211,121 +216,118 @@ def main():
           all_pos, win_size, adj_chrom_dicc[chrom],
       )
       
-      for j, pop_b in enumerate(pops):
-        for i in range(j):
-          pop_a = pops[i]
-          #don't calculate differences between pops of the same species
-          if pop_a[:3] != pop_b[:3]:
-            print(chrom, pop_a, pop_b)
-            df_dicc = {'win_id': [],
-                       'chrom': [],
-                       'start': [],
-                       'end': [],
-                       'num_sites': [],
-                       'seg_sites': []}
-            
-            for wind in wind_dicc:
-                #extract the left and right boundaries of the window
-                left, right = left_right[wind]
-                #find the sites in this window
-                wind_idx = np.where(((left <= all_pos) & (all_pos <= right)))[0]
-                #process the window
-                if wind_idx.size > 0:
-                    #get the window location
-                    wind_loc = all_pos.locate_range(left, right)
-                    #subset the genotype matrix
-                    sub_gt = allel.GenotypeArray(callset[wind_loc])
-                    #find polymorphic sites
-                    var_mask = sub_gt.count_alleles().is_variant()
-                    #add to lists
-                    df_dicc['win_id'].append(chrom + '_' + str(left))
-                    df_dicc['chrom'].append(chrom)
-                    df_dicc['start'].append(left)
-                    df_dicc['end'].append(right)
-                    df_dicc['num_sites'].append(wind_idx.size)
-                    df_dicc['seg_sites'].append(var_mask.sum())
-                else:
-                    df_dicc['win_id'].append(chrom + '_' + str(left))
-                    df_dicc['chrom'].append(chrom)
-                    df_dicc['start'].append(left)
-                    df_dicc['end'].append(right)
-                    df_dicc['num_sites'].append(0)
-                    df_dicc['seg_sites'].append(0)
-            
-            
-            #convert the dictionary to a dataframe
-            window_df = pd.DataFrame(df_dicc)  
-            
-            #make lists of window values
-            win_ids = window_df.win_id.values
-            chroms = window_df.chrom.values
-            starts = window_df.start.values
-            ends = window_df.end.values
-            tot_sites = window_df.num_sites.values
-            
-            #make empty lists corresponding to database fields
-            pwd_ids = []
-            pop_as = []
-            pop_bs = []
-            der_freq_diffs = []
-            dxys = []
-            fsts = []
-            
-            #get stats for each window
-            for idx in range(window_df.shape[0]):
-                pwd_id += 1
-                pwd_ids.append(pwd_id)
-                pop_as.append(pop_a)
-                pop_bs.append(pop_b)
-                #extract the ortholog information
-                chrom = chroms[idx]
-                start = starts[idx]
-                end = ends[idx]
-                num_sites = tot_sites[idx]
-                
-                
-                if num_sites == 0:
-                  der_freq_diffs.append(np.nan)
-                  dxys.append(np.nan)
-                  fsts.append(np.nan)
-                else:
-                  #extract the genotypes and positions
-                  zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-                  callset, all_pos = load_callset_pos(chrom, zarr_file)
-                  #get the windows
-                  wind_loc = all_pos.locate_range(start, end)
-                  
-                  win_gt = allel.GenotypeArray(callset[wind_loc])
-                  
-                  #compute derived allele freq difference
-                  der_freq_diff = calc_mean_der_freq_diff(gt_a=win_gt.take(idx_pop_dicc[pop_a], axis=1), gt_b=win_gt.take(idx_pop_dicc[pop_b], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
-                          
-                  #compute dxy
-                  dxy = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc[pop_a], pop_y=idx_pop_dicc[pop_b])
-                  
-                  #compute fst
-                  fst = calc_fst(gt=win_gt, pop_a=idx_pop_dicc[pop_a], pop_b=idx_pop_dicc[pop_b])
-            
-                  der_freq_diffs.append(der_freq_diff)
-                  dxys.append(dxy)
-                  fsts.append(fst)
-                     
-            
-            #add columns to window_df
-            window_df.insert(0, 'pwd_id', pwd_ids)
-            
-            window_df["pop_a"] = pop_as
-            window_df["pop_b"] = pop_bs
-            window_df["der_freq_diff"] = der_freq_diffs
-            window_df["dxy"] = dxys
-            window_df["fst"] = fsts
+      for pops in pop_comps:
+        pop_a, pop_b = pops
+        print(chrom, pop_a, pop_b)
+        df_dicc = {'win_id': [],
+                   'chrom': [],
+                   'start': [],
+                   'end': [],
+                   'num_sites': [],
+                   'seg_sites': []}
+        
+        for wind in wind_dicc:
+            #extract the left and right boundaries of the window
+            left, right = left_right[wind]
+            #find the sites in this window
+            wind_idx = np.where(((left <= all_pos) & (all_pos <= right)))[0]
+            #process the window
+            if wind_idx.size > 0:
+                #get the window location
+                wind_loc = all_pos.locate_range(left, right)
+                #subset the genotype matrix
+                sub_gt = allel.GenotypeArray(callset[wind_loc])
+                #find polymorphic sites
+                var_mask = sub_gt.count_alleles().is_variant()
+                #add to lists
+                df_dicc['win_id'].append(chrom + '_' + str(left))
+                df_dicc['chrom'].append(chrom)
+                df_dicc['start'].append(left)
+                df_dicc['end'].append(right)
+                df_dicc['num_sites'].append(wind_idx.size)
+                df_dicc['seg_sites'].append(var_mask.sum())
+            else:
+                df_dicc['win_id'].append(chrom + '_' + str(left))
+                df_dicc['chrom'].append(chrom)
+                df_dicc['start'].append(left)
+                df_dicc['end'].append(right)
+                df_dicc['num_sites'].append(0)
+                df_dicc['seg_sites'].append(0)
+        
+        
+        #convert the dictionary to a dataframe
+        window_df = pd.DataFrame(df_dicc)  
+        
+        #make lists of window values
+        win_ids = window_df.win_id.values
+        chroms = window_df.chrom.values
+        starts = window_df.start.values
+        ends = window_df.end.values
+        tot_sites = window_df.num_sites.values
+        
+        #make empty lists corresponding to database fields
+        pwd_ids = []
+        pop_as = []
+        pop_bs = []
+        der_freq_diffs = []
+        dxys = []
+        fsts = []
+        
+        #get stats for each window
+        for idx in range(window_df.shape[0]):
+            pwd_id += 1
+            pwd_ids.append(pwd_id)
+            pop_as.append(pop_a)
+            pop_bs.append(pop_b)
+            #extract the ortholog information
+            chrom = chroms[idx]
+            start = starts[idx]
+            end = ends[idx]
+            num_sites = tot_sites[idx]
             
             
-            #import window_df to db
-            conn = sqlite3.connect(db_file)
-            window_df.to_sql(poly_diff_win_table, if_exists = 'append', index=False, con=conn)
-                          
-            conn.commit()
+            if num_sites == 0:
+              der_freq_diffs.append(np.nan)
+              dxys.append(np.nan)
+              fsts.append(np.nan)
+            else:
+              #extract the genotypes and positions
+              zarr_file = zarr_prefix + '_' + chrom + '.zarr'
+              callset, all_pos = load_callset_pos(chrom, zarr_file)
+              #get the windows
+              wind_loc = all_pos.locate_range(start, end)
+              
+              win_gt = allel.GenotypeArray(callset[wind_loc])
+              
+              #compute derived allele freq difference
+              der_freq_diff = calc_mean_der_freq_diff(gt_a=win_gt.take(idx_pop_dicc[pop_a], axis=1), gt_b=win_gt.take(idx_pop_dicc[pop_b], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+                      
+              #compute dxy
+              dxy = calc_dxy(gt=win_gt, pop_x=idx_pop_dicc[pop_a], pop_y=idx_pop_dicc[pop_b])
+              
+              #compute fst
+              fst = calc_fst(gt=win_gt, pop_a=idx_pop_dicc[pop_a], pop_b=idx_pop_dicc[pop_b])
+        
+              der_freq_diffs.append(der_freq_diff)
+              dxys.append(dxy)
+              fsts.append(fst)
+                 
+        
+        #add columns to window_df
+        window_df.insert(0, 'pwd_id', pwd_ids)
+        
+        window_df["pop_a"] = pop_as
+        window_df["pop_b"] = pop_bs
+        window_df["der_freq_diff"] = der_freq_diffs
+        window_df["dxy"] = dxys
+        window_df["fst"] = fsts
+        
+        
+        #import window_df to db
+        conn = sqlite3.connect(db_file)
+        window_df.to_sql(poly_diff_win_table, if_exists = 'append', index=False, con=conn)
+                      
+        conn.commit()
 
 
   conn.close()
