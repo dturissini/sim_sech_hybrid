@@ -25,7 +25,7 @@ allele_dist_pi_sech_table <- paste('outlier_pi_sech_win_sech_adj_allele_dist_', 
 allele_dist_random_table <- paste('outlier_random_win_sech_adj_allele_dist_', win_size, '_', pop_str, sep='')
 
 #define str of pops to use in db queries
-pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk'"
+pop_sql_str <- "'sechanro', 'sechden', 'sechlad', 'sechmari', 'sechpras', 'sechunk'"
 
 
 #get allele distances

@@ -31,7 +31,7 @@ allele_dist_table <- paste('outlier_d_plus_win_sech_adj_allele_dist_', win_size,
 tmp_dsw_table <- paste('outlier_tmp_dsw_', win_size, sep='')
 
 #define pop str to use in db queries
-pop_sql_str <- "'sechanro', 'sechdenis', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe', 'sshanro'"
+pop_sql_str <- "'sechanro', 'sechden', 'sechlad', 'sechmari', 'sechpras', 'sechunk', 'sshlad', 'sshmahe', 'sshanro'"
 
 
 
