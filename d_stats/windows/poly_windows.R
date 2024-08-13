@@ -8,7 +8,7 @@ table_suffix <- args[2]
 
 
 #define file paths
-base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
+base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 gwas_snp_db_file <- '/proj/matutelb/projects/gwas/gwas_results/sech_oa_only_sim_pca/results/sech_oa_only_sim_pca_snp.db'
 pdf_file <- paste('poly_win_', win_size, '_', table_suffix, '.pdf', sep='')
@@ -290,7 +290,7 @@ if ('sech' %in% pops)
   #scatter plot of D+ vs ABBA-BABA with points colored by pi sech and point size scales with pi sech to help outliers standout
   cexes <- 3 * poly_wins$pi[win_filter_d_plus & poly_wins$pop == 'sech'] / max(poly_wins$pi[win_filter_d_plus & poly_wins$pop == 'sech'])
   plot(d_wins$abba[win_filter_d_plus] - d_wins$baba[win_filter_d_plus], d_wins$d_plus[win_filter_d_plus], pch=20, cex=cexes, col=sech_pi_cols, xlab='ABBA-BABA', ylab='D+', main='ABBA - BABA vs D+')
-  
+
   #plot custom legend
   x_len <- max((d_wins$abba - d_wins$baba)[win_filter_d_plus]) - min((d_wins$abba - d_wins$baba)[win_filter_d_plus]) 
   y_len <- max(d_wins$d_plus[win_filter_d_plus]) - min(d_wins$d_plus[win_filter_d_plus]) 
