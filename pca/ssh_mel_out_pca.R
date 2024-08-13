@@ -1,6 +1,6 @@
 library("RSQLite")  
 library(colorRamps)
-setwd('/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/pca')
+setwd('/work/users/d/t/dturissi/drosophila/ssh/introgression/pca')
 
 
 pca_plots <- function (pca_name, pops_df)
@@ -24,7 +24,7 @@ pca_plots <- function (pca_name, pops_df)
   }
 
 
-db_file <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db'
+db_file <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db'
 conn <- dbConnect(dbDriver("SQLite"), db_file)
 
 #all

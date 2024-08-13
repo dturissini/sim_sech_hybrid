@@ -52,8 +52,8 @@ def calc_alt_freqs(gt):
 
 
 def main():
-  zarr_prefix = '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel'                                                                                                     
-  db_file = '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db'
+  zarr_prefix = '/work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel'                                                                                                     
+  db_file = '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db'
   
   #establish db connection and create d_stats_win table
   conn = sqlite3.connect(db_file)  

@@ -28,5 +28,5 @@ source /proj/matutelb/software/cactus-bin-v2.8.0/venv-cactus-v2.8.0/bin/activate
 
 
 #make maf
-sbatch /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/cactus_hal2maf.sbatch
+sbatch /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/cactus_hal2maf.sbatch
 

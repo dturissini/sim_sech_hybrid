@@ -3,7 +3,7 @@ import os
 import re
 import gzip
 
-#python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/add_outgroup_to_vcf.py D_SIMULANS D_MELANOGASTER /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/sim_mel.maf /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/mel_aligned_sim.fasta /proj/matutelb/data_share/simulans_OA_resistance/simulans_sechellia.vcf.gz /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/sim_sech_outgroup_mel.vcf.gz
+#python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/add_outgroup_to_vcf.py D_SIMULANS D_MELANOGASTER /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/sim_mel.maf /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/mel_aligned_sim.fasta /proj/matutelb/data_share/simulans_OA_resistance/simulans_sechellia.vcf.gz /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel.vcf.gz
 
 
 

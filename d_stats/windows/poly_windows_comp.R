@@ -9,7 +9,7 @@ table_suffix_b <- args[3]
 
 
 #define file paths
-base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
+base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 pdf_file <- paste('poly_win_comp_', win_size, '_', table_suffix_a, '_', table_suffix_b, '.pdf', sep='')
 

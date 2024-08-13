@@ -1,4 +1,4 @@
-sqlite3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/ssh_d_win.db
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 attach database '/proj/matutelb/projects/gwas/genotype_datasets/sech_oa/sech_oa_anno.db' as a;
 attach database '/proj/matutelb/projects/gwas/orthodb/odb11v0_subsetted_sim_mel.db' as o;

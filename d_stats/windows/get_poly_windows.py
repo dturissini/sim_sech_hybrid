@@ -67,7 +67,7 @@ def chr_seq_len(window_size, chr_dicc):
 
 #break up a chromosome into windows
 def window_info(positions, window_size, sequence_length):
-    # Intialize a dicctionary with the start and stop position for each window.
+    # Intialize a dictionary with the start and stop position for each window.
     windows = {}
     start_stop = {}
     index = 0

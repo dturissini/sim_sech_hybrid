@@ -1,7 +1,7 @@
-setwd('/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats')
+setwd('/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats')
 
 chroms <- c('2L', '2R', '3L', '3R', 'X')
-base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/'
+base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/'
 
 pdf('ssh_dplus_bootstrap.pdf', height=8, width=16)
 par(mfrow=c(1,2))

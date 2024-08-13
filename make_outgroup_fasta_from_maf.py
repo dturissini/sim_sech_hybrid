@@ -1,7 +1,7 @@
 import argparse
 import os
 
-#python3 /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/scripts/make_outgroup_fasta_from_maf.py D_SIMULANS D_MELANOGASTER /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/sim_mel.maf /proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/mel_aligned_sim.fasta 
+#python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/make_outgroup_fasta_from_maf.py D_SIMULANS D_MELANOGASTER /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/sim_mel.maf /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/mel_aligned_sim.fasta 
 
 
 def parse_args():

@@ -8,7 +8,7 @@ outlier_type <- as.character(args[2])
 pop_str <- as.character(args[3])
 
 #define file paths
-base_dir <- '/proj/matutelb/projects/drosophila/sim_sech_hybrid/introgression/d_stats/windows/'
+base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
 gwas_snp_db_file <- '/proj/matutelb/projects/gwas/gwas_results/sech_oa_only_sim_pca/results/sech_oa_only_sim_pca_snp.db'
 anno_db_file <-  paste('/proj/matutelb/projects/gwas/genotype_datasets/sech_oa/sech_oa_anno.db', sep='')
