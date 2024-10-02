@@ -9,7 +9,7 @@ import sqlite3
 
 
 #create d stats table
-def create_windows_table(conn, win_size, outlier_type, sites_table):
+def create_windows_table(conn, win_size, outlier_type, sites_table, sites_alleles_table):
   cur = conn.cursor()    
   cur.execute(f"drop table if exists {sites_table}")
   cur.execute(f"""create table {sites_table}
@@ -17,7 +17,7 @@ def create_windows_table(conn, win_size, outlier_type, sites_table):
                    win_id varchar(30),
                    chrom varchar(20),
                    pos int,
-                   outgroup_allele varchar(1),
+                   outgroup_allele_numeric varchar(1),
                    pop varchar(50),
                    total_alleles int,
                    der_alleles int)""")
@@ -26,7 +26,19 @@ def create_windows_table(conn, win_size, outlier_type, sites_table):
   cur.execute(f"create index idx_odwps_pos_{win_size}{outlier_type} on {sites_table}(pos)")
   cur.execute(f"create index idx_odwps_win_id_{win_size}{outlier_type} on {sites_table}(win_id)")
   cur.execute(f"create index idx_odwps_pop_{win_size}{outlier_type} on {sites_table}(pop)")
+  
+  
+  cur.execute(f"drop table if exists {sites_alleles_table}")
+  cur.execute(f"""create table {sites_alleles_table}
+                  (odwpsa_id int primary key,
+                   chrom varchar(20),
+                   pos int,
+                   outgroup_allele varchar(1),
+                   der_allele varchar(1))""")
 
+                   
+  cur.execute(f"create index idx_odwpsa_pos_{win_size}{outlier_type} on {sites_alleles_table}(pos)")
+  
   cur.close()
   
 
@@ -37,9 +49,12 @@ def load_callset_pos(chrom, zarr_file):
     callset = zarr.open_group(zarr_file, mode='r')
     # Extract the genotypes.
     geno = callset[f'{chrom}/calldata/GT']
+    # Extract the ref and alt alleles.
+    refs = callset[f'{chrom}/variants/REF']
+    alts = callset[f'{chrom}/variants/ALT']
     # Load the positions.
     pos = allel.SortedIndex(callset[f'{chrom}/variants/POS'])
-    return geno, pos
+    return geno, pos, refs, alts
 
 
 # get derived allele counts for a given window
@@ -76,8 +91,9 @@ def main():
   d_win_table = "d_stat_win_" + str(win_size) + '_' + pop_str
   poly_win_table = "poly_win_" + str(win_size)
   sites_table = "outlier_" + outlier_type + "_win_sites_" + str(win_size) + '_' + pop_str
+  sites_alleles_table = "outlier_" + outlier_type + "_win_sites_alleles_" + str(win_size) + '_' + pop_str
 
-  create_windows_table(conn, win_size, outlier_type, sites_table)  
+  create_windows_table(conn, win_size, outlier_type, sites_table, sites_alleles_table)  
 
 
   # Read in meta data as a pandas dataframe.
@@ -135,6 +151,7 @@ def main():
 
   # calculate stats for every outlier window
   odwps_id = 0
+  odwpsa_id = 0
   for idx in range(win_df.shape[0]):
     win_id = win_df.win_id.values[idx]
     chrom = win_df.chrom.values[idx]
@@ -143,7 +160,7 @@ def main():
      
     # Extract the genotype callset and positions.
     zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-    callset, all_pos = load_callset_pos(chrom, zarr_file)
+    callset, all_pos, refs, alts = load_callset_pos(chrom, zarr_file)
     # Identify the window to extract.
     wind_loc = all_pos.locate_range(start, end)
     win_gt = allel.GenotypeArray(callset[wind_loc])
@@ -154,7 +171,7 @@ def main():
       win_ids = []
       chroms = []
       positions = []
-      outgroup_alleles = []
+      outgroup_alleles_numeric = []
       pops = []
       total_alleles = []
       der_alleles = []
@@ -164,7 +181,7 @@ def main():
       total_alleles, der_alleles = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
       
       #get outgroup alleles
-      outgroup_alleles.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
+      outgroup_alleles_numeric.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
       
       for pos in all_pos[wind_loc]:
         odwps_id += 1
@@ -176,20 +193,62 @@ def main():
         
       #create dataframe using lists that can be loaded into the database table           
       site_df = pd.DataFrame()    
-      #add columns to site_df
-      
+
+      #add columns to site_df      
       site_df["odwps_id"] = odwps_ids  
       site_df["win_id"] = win_ids  
       site_df["chrom"] = chroms  
       site_df["pos"] = positions
-      site_df["outgroup_allele"] = outgroup_alleles
+      site_df["outgroup_allele_numeric"] = outgroup_alleles_numeric
       site_df["pop"] = pops
       site_df["total_alleles"] = total_alleles
       site_df["der_alleles"] = der_alleles
+      
+      
            
-      #import site_df to db
+      #import site_df db
       conn = sqlite3.connect(db_file)
       site_df.to_sql(sites_table, if_exists = 'append', index=False, con=conn)
+
+      if pop_i == focal_pops[0]:
+        #get outgroup and derived alleles
+        odwpsa_ids = []
+        allele_chroms = []
+        allele_positions = []
+        outgroup_alleles = []
+        der_alleles = []
+        
+        outgroup_allele_i = 0
+        for i in range(wind_loc.start, wind_loc.stop):
+          alleles = [refs[i][0], alts[i][0]]        
+          der_allele_numeric = abs(outgroup_alleles_numeric[outgroup_allele_i] - 1)
+          outgroup_allele = alleles[outgroup_alleles_numeric[outgroup_allele_i]]
+          der_allele = alleles[der_allele_numeric]
+          
+          outgroup_allele_i += 1
+          odwpsa_id += 1
+        
+          odwpsa_ids.append(odwpsa_id)
+          allele_chroms.append(chrom)
+          allele_positions.append(all_pos[i])
+          
+          outgroup_alleles.append(outgroup_allele)
+          der_alleles.append(der_allele)
+          
+        
+             
+        #create dataframe using lists that can be loaded into the database table           
+        site_allele_df = pd.DataFrame()    
+        
+        #add columns to site_df      
+        site_allele_df["odwpsa_id"] = odwpsa_ids  
+        site_allele_df["chrom"] = allele_chroms  
+        site_allele_df["pos"] = allele_positions
+        site_allele_df["outgroup_allele"] = outgroup_alleles
+        site_allele_df["der_allele"] = der_alleles
+        
+        #import site_df_allele_to db
+        site_allele_df.to_sql(sites_alleles_table, if_exists = 'append', index=False, con=conn)
     
   conn.commit()
   conn.close()
