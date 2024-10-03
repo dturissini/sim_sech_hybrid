@@ -1,28 +1,54 @@
 cd /work/users/d/t/dturissi/drosophila/ssh/assembly/inversion_check
 
-
+#run minimap to map contigs assembled by canu
 sbatch inversion_check_minimap.sbatch sech_Denis_NF22 contigs
 sbatch inversion_check_minimap.sbatch sech_Denis_NF49 contigs
 sbatch inversion_check_minimap.sbatch sech_Denis_NF712 contigs
 sbatch inversion_check_minimap.sbatch sech_Anro_114_female contigs
 sbatch inversion_check_minimap.sbatch sech_Denis_NF69 contigs
 
+
+
+#run minimap to map reads (trimmed by canu)
 sbatch inversion_check_minimap.sbatch sech_Denis_NF22 trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Denis_NF49 trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Denis_NF712 trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Anro_114_female trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Denis_NF69 trimmedReads
 
+
+
+#identify contigs that overlap with putative inversions
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF22 contigs
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF49 contigs
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF712 contigs
+python3 find_inversion_overlaps_in_minimap_results.py sech_Anro_114_female contigs
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF69 contigs
+
+
+
+#identify reads that overlap with putative inversions
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF22 trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF49 trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF712 trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py sech_Anro_114_female trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF69 trimmedReads
+
+
+#store inversion overlaps in db table
 python3 process_inversion_overlaps.py contigs
 python3 process_inversion_overlaps.py trimmedReads
 
 
+#plot contigs that overlap with putative inversions based on minimap
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF22 contigs
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF49 contigs
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF712 contigs
 Rscript inversion_check_contig_map.R 50000 sech_Anro_114_female contigs
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF69 contigs
 
+
+#plot reads that overlap with putative inversions based on minimap
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF22 trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF49 trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF712 trimmedReads
@@ -30,27 +56,28 @@ Rscript inversion_check_contig_map.R 50000 sech_Anro_114_female trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF69 trimmedReads
 
 
+#map with lastz the contigs identified by minimap that overlap putative inversions
 sbatch inversion_check_lastz.sbatch sech_Denis_NF22
 sbatch inversion_check_lastz.sbatch sech_Denis_NF49
 sbatch inversion_check_lastz.sbatch sech_Denis_NF712
 sbatch inversion_check_lastz.sbatch sech_Anro_114_female
-
 sbatch inversion_check_lastz.sbatch sech_Denis_NF69
-sbatch inversion_check_lastz.sbatch sech_Anro_114_female
 
-######
+
+
+#get number of derived and sech anro alleles  for contigs overlapping putative inversions
 python3 get_derived_alleles_from_contig_mafs.py 
 
 
 
 
-#change in the future to read through gzip file and only print small subset of reads we actually need
-gunzip /work/users/d/t/dturissi/drosophila/ssh/assembly/assemblies/sech_Denis_NF69/sech_Denis_NF69.trimmedReads.fasta.gz
-gunzip /work/users/d/t/dturissi/drosophila/ssh/assembly/assemblies/sech_Anro_114_female/sech_Anro_114_female.trimmedReads.fasta.gz
 
+#map with lastz the contigs identified by minimap that overlap putative inversions
 sbatch inversion_check_lastz_reads.sbatch sech_Denis_NF69
 sbatch inversion_check_lastz_reads.sbatch sech_Anro_114_female
 
+
+#identify sech Anro alleles for polymorphic sites within putative inversions by looking at illumina data
 python3 get_inversion_sech_alleles.py /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db \
                                       /work/users/d/t/dturissi/drosophila/ssh/assembly/inversion_check/inversion_check_per_der.db \
@@ -61,17 +88,23 @@ python3 get_inversion_sech_alleles.py /work/users/d/t/dturissi/drosophila/ssh/in
 
 
 ######
+#get number of derived and sech anro alleles for reads overlapping putative inversions
 python3 get_derived_alleles_from_mafs_reads.py 
 
 
 
 
 
-
+#look at anro allele concordance for reads overlapping putative inversions
 Rscript inversion_check_per_der_reads.R
+
+
+#look at anro allele concordance for reads overlapping putative inversions, coloring reads by their amount of anro allele concordance
 Rscript inversion_check_per_der_reads_inversion_plots.R
 
 
+
+#query to get anro allele concordance for each read overlapping putative inversions
 sqlite3 inversion_check_per_der.db
 .headers on
 select sample_id, inv_name, read_name, total_sites, 1.0 *num_anro_b3_alleles / total_sites prop_sech_anro_alleles
@@ -80,7 +113,7 @@ where total_sites > 0 order by prop_sech_anro_alleles, read_name;
 
 
 
-#per contig anro concordance 
+#per contig anro allele concordance, helpful for identifying samples that may have non-anro haplotypes
 sqlite3 inversion_check_per_der.db
 .headers on
 select sample_id, inv_name, contig_name, 1.0 *num_anro_b3_alleles / total_sites prop_sech_anro_alleles
