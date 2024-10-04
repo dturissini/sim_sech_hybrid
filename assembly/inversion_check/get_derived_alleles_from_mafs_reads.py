@@ -5,6 +5,7 @@ import tempfile
 import sqlite3
 import pandas as pd
 import re
+from datetime import datetime
 
 
 #python3 get_derived_alleles_from_read_mafs.py 
@@ -31,20 +32,7 @@ def main():
    
   cur.execute("create index idx_icpdt_sample_id on inversion_check_per_der_reads(sample_id)")
   cur.execute("create index idx_icpdt_inv_name on inversion_check_per_der_reads(inv_name)")
-  
-##  sites_alleles_df = pd.read_sql(f"""select sa.chrom, sa.pos, outgroup_allele, der_allele, a.num_der_alleles num_anro_b3_der_alleles
-##                                     from outlier_pi_sech_win_sites_alleles_50000_sim_ssh_sech_mel sa, outlier_pi_sech_win_alleles_sech_50000_sim_ssh_sech_mel a
-##                                     where sa.chrom = a.chrom
-##                                     and sa.pos = a.pos
-##                                     and a.num_der_alleles != -2
-##                                     and a.sample_id = 'SECH_3-sech_Anro_B3_TTAGGC_L001'
-##                                     and exists (select 'x' from outlier_pi_sech_win_sites_50000_sim_ssh_sech_mel s
-##                                                 where sa.chrom = s.chrom
-##                                                 and sa.pos = s.pos
-##                                                 and 1.0 * der_alleles / total_alleles > 0
-##                                                 and 1.0 * der_alleles / total_alleles < 1 
-##                                                 and pop = 'sech')""", conn)
-  
+    
   sites_alleles_df = pd.read_sql(f"""select distinct chrom, pos, outgroup_allele, der_allele, anro_allele
                                      from inversion_sech_alleles""", conn)
   
@@ -55,7 +43,9 @@ def main():
   icpdt_id = 0
   with tempfile.NamedTemporaryFile(mode='w') as t:
     for maf_file in glob.glob(os.path.join(maf_dir, '*.maf')):
-      print(maf_file)
+      if icpdt_id % 100 == 0:
+        print(icpdt_id, datetime.now())
+        
       num_der_sites = 0
       num_anc_sites = 0
       num_anro_b3_alleles = 0
@@ -83,15 +73,6 @@ def main():
               read_allele = read_seq[aln_pos:(aln_pos + 1)]
               
               
-##              if read_allele == row['der_allele']:
-##                num_der_sites += 1
-##                if row['num_anro_b3_der_alleles'] == 2:
-##                  num_anro_b3_alleles += 1
-##              elif read_allele == row['outgroup_allele']:
-##                num_anc_sites += 1
-##                if row['num_anro_b3_der_alleles'] == 0:
-##                  num_anro_b3_alleles += 1
-
               if read_allele == row['der_allele']:
                 num_der_sites += 1
               elif read_allele == row['outgroup_allele']:
