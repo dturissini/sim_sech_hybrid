@@ -37,7 +37,7 @@ for (sample_id in sample_ids$sample_id)
   pdf(pdf_file, height=8, width=10.5)
   for (i in 1:nrow(possible_inversions))
     {
-    layout(matrix(c(1, 2, 2, 2), nrow=4, byrow=T))
+    layout(matrix(c(1, 2, 3, 4, 4, 4), nrow=6, byrow=T))
     par(mar=c(0, 4.1, 4.1, 1.1))
     
     win_sites <- dbGetQuery(d_win_conn, paste("select *
@@ -49,8 +49,33 @@ for (sample_id in sample_ids$sample_id)
                                          order by pos", sep=''))
   
   
-    plot(win_sites$pos, win_sites$der_alleles / win_sites$total_alleles, pch=20, col='red', xaxt='n', xlab='', ylim=c(0,1), ylab='Derived freq', main=possible_inversions$name[i])
+    plot(win_sites$pos, win_sites$der_alleles / win_sites$total_alleles, pch=20, col='red', xaxt='n', xlab='', xlim=c(possible_inversions$start[i], possible_inversions$end[i]), ylim=c(0,1), ylab='Derived freq', main=possible_inversions$name[i])
 
+    par(mar=c(0, 4.1, 0, 1.1))
+    read_alleles <- dbGetQuery(conn, paste("select pos, 1.0 * sum(der_site) / count(*) der_freq, 1.0 * sum(anro_site) / count(*) anro_freq
+                                                  from inversion_check_read_alleles
+                                                  where sample_id = '", sample_id, "'
+                                                  and inv_name = '", possible_inversions$name[i], "'
+                                                  group by pos", sep=''))
+
+    win_size <- 2000
+    starts <- seq(possible_inversions$start[i], possible_inversions$end[i] + win_size, win_size)
+    avg_win_der_freqs <- c()
+    avg_win_anro_freqs <- c()
+    for (start in starts)
+      {
+      win_filter <- read_alleles$pos >= start & read_alleles$pos < start + win_size
+      avg_win_der_freqs <- c(avg_win_der_freqs, sum(read_alleles$der_freq[win_filter]) / sum(win_filter))
+      avg_win_anro_freqs <- c(avg_win_anro_freqs, sum(read_alleles$anro_freq[win_filter]) / sum(win_filter))
+      }
+ 
+    plot(read_alleles$pos, read_alleles$der_freq, pch=20, xaxt='n', xlab='', xlim=c(possible_inversions$start[i], possible_inversions$end[i]), ylim=c(0,1), ylab='Nanopore derived freq')
+    points(starts + win_size / 2, avg_win_der_freqs, type='l', col='blue')
+    
+    
+    plot(read_alleles$pos, read_alleles$anro_freq, pch=20, xaxt='n', xlab='', xlim=c(possible_inversions$start[i], possible_inversions$end[i]), ylim=c(0,1), ylab='Nanopore Anro freq')
+    points(starts + win_size / 2, avg_win_anro_freqs, type='l', col='red')
+    
     par(mar=c(5.1, 4.1, 0, 1.1))
     
     inv_overlaps <- subset(read_overlaps, inv_name == possible_inversions$name[i])
@@ -58,7 +83,7 @@ for (sample_id in sample_ids$sample_id)
     inv_overlaps_reads <- inv_overlaps_reads[order(inv_overlaps_reads$start), ]
     
     
-    plot(1, type='n', xlim=c(min(win_sites$pos), max(win_sites$pos)), ylim=c(1, nrow(inv_overlaps)), xlab=possible_inversions$chrom[i], ylab='', yaxt='n', main='')
+    plot(1, type='n', ylim=c(1, nrow(inv_overlaps)), xlab=possible_inversions$chrom[i], xlim=c(possible_inversions$start[i], possible_inversions$end[i]), ylab='', yaxt='n', main='')
     for (j in nrow(inv_overlaps_reads):1)
       {
       anro_concord <- dbGetQuery(conn, paste("select inv_name, read_name, total_sites, 1.0 * num_anro_b3_alleles / total_sites anro_concordance
