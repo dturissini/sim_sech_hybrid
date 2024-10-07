@@ -107,8 +107,10 @@ def main():
                   num_anro_b3_alleles += 1
                   anro_site = 1
 
+                icra_id += 1
                 t_sites.write(f"{icra_id}\t{sample_id}\t{inv_name}\t{read_name}\t{row['chrom']}\t{row['pos']}\t{read_allele}\t{der_site}\t{anc_site}\t{anro_site}\n")                
-          
+
+                
           icpdt_id += 1
           total_sites = num_der_sites + num_anc_sites
           
