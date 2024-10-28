@@ -27,9 +27,15 @@ for (sample_id in sample_ids$sample_id)
                                           where sample_id = '", sample_id, "'
                                           and total_sites > 0", sep=''))
 
-  hist(anro_concord$anro_concordance, breaks = seq(0, 1.05, .05), col='black', xlab='Anro allele concordance', ylab='reads', main=sample_id)
-  plot(anro_concord$anro_concordance, anro_concord$total_sites, pch=20, col=adjustcolor('gray', .4), xlab='Anro allele concordance', ylab='total sites', main=sample_id)
-
+  hist(anro_concord$anro_concordance[substr(anro_concord$inv_name, 1, 4) != 'rand'], breaks = seq(0, 1.05, .05), col='black', xlab='Anro allele concordance', ylab='reads', main=c(sample_id, 'putative inversions'))
+  plot(anro_concord$anro_concordance[substr(anro_concord$inv_name, 1, 4) != 'rand'], anro_concord$total_sites[substr(anro_concord$inv_name, 1, 4) != 'rand'], pch=20, col=adjustcolor('gray', .4), xlab='Anro allele concordance', ylab='total sites', main=c(sample_id, 'putative inversions'))
+  
+  if (sum(substr(anro_concord$inv_name, 1, 4) == 'rand') > 0)
+    {
+    hist(anro_concord$anro_concordance[substr(anro_concord$inv_name, 1, 4) == 'rand'], breaks = seq(0, 1.05, .05), col='black', xlab='Anro allele concordance', ylab='reads', main=c(sample_id, 'random regions'))
+    plot(anro_concord$anro_concordance[substr(anro_concord$inv_name, 1, 4) == 'rand'], anro_concord$total_sites[substr(anro_concord$inv_name, 1, 4) == 'rand'], pch=20, col=adjustcolor('gray', .4), xlab='Anro allele concordance', ylab='total sites', main=c(sample_id, 'random regions'))
+    }
+    
   for (inv_name in sort(unique(anro_concord$inv_name)))
     {
     hist(anro_concord$anro_concordance[anro_concord$inv_name == inv_name], breaks = seq(0, 1.05, .05), col='black', xlab='Anro allele concordance', ylab='reads', main=c(sample_id, inv_name))   
