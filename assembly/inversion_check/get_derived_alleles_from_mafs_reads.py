@@ -71,9 +71,9 @@ def main():
         num_anc_sites = 0
         num_anro_b3_alleles = 0
         with open(maf_file, 'r') as m:
-          m_maf = re.search(r'.+/mafs_reads/(.._\d+M)_(.+)_([a-zA-Z0-9\-]+).maf', maf_file)
+          m_maf = re.search(r'.+/mafs_reads/(.+_\d+M)_(.+)_([a-zA-Z0-9\-]+).maf', maf_file)
           inv_name, sample_id, read_name = m_maf.groups()
-          
+
           for line in m:
             if line[0] == 'a':
               ref_line = next(m)
