@@ -1,0 +1,69 @@
+#make a database table with chromosome lengths for this system
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db 'drop table if exists chrom_lens'
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db \
+        "create table chrom_lens \
+         (chrom varchar(20) primary key, \
+          chrom_len int)"
+
+
+#create db table with chromosome lengths
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db \
+       "insert into chrom_lens \
+        values \
+        ('2L', 23857595), \
+        ('2R', 22319025), \
+        ('3L', 23399903), \
+        ('3R', 28149585), \
+        ('X', 22032822)"
+          
+  
+  
+
+
+  
+  
+          
+#process metadata to make a db table linking sample_id to population using the same sample order as the vcf to simplify later processing
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_filtered_metadata.py /proj/matutelb/projects/gwas/genotype_datasets/sech_oa/sim_sech_final_samplelist.tsv \
+                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel_2L.recode.vcf.gz \
+                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+
+
+
+#make sample_pop_link linking sample_ids to pops
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/make_sample_pop_link.py /work/users/d/t/dturissi/drosophila/ssh/introgression/ssh_pops.txt \
+                                                                                                /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+
+
+
+#make table with pop colors for plotting
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db 'drop table if exists pop_cols'
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db \
+        "create table pop_cols \
+         (pop varchar(50) primary key, \
+          col varchar(20),
+          short_desc varchar(20))"
+
+
+#make db table with colors and short descriptions for each pop to be used for plotting
+sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db \
+       "insert into pop_cols \
+        values \
+        ('sim', 'blue', 'sim'), \
+        ('ssh', 'gold', 'ssh'), \
+        ('sech', 'red', 'sech'), \
+        ('sechbase', 'maroon', 'sech - Base'), \
+        ('sechden', 'purple', 'sech - Denis'), \
+        ('sechpras', 'lightblue', 'sech - Praslin'), \
+        ('sechdepr', 'brown', 'sech - Den & Pras'), \
+        ('sechanro', 'orange', 'sech - Anro'), \
+        ('sechlad', 'green', 'sech -La Digue'), \
+        ('sechunk', 'gray', 'sech - Unknown'), \
+        ('sechmari', 'darkblue', 'sech - Marianne'), \
+        ('sshlad', 'deeppink', 'ssh - La Digue'), \
+        ('sshmahe', 'aquamarine2', 'ssh - Mahe'),
+        ('sshanro', 'tan', 'ssh - Anro')"
+
+
+
+

@@ -1,6 +1,8 @@
 cd /proj/matutelb/projects/drosophila/island_gigantism/
 
-
+#################
+#make maf file
+#################
 #confirm same sim genome is used in both hal file and vcf
 grep D_SIMULANS, drosophila_stats.txt
 D_SIMULANS, 0, 131663590, 95, 1897243, 0
@@ -30,3 +32,21 @@ source /proj/matutelb/software/cactus-bin-v2.8.0/venv-cactus-v2.8.0/bin/activate
 #make maf
 sbatch /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/cactus_hal2maf.sbatch
 
+
+#################
+#add mel alleles to vcf
+#################
+sbatch add_mel_to_sim_vcf.sbatch
+
+
+#################
+#split vcf file by chromosome arms
+#################
+sbatch --array 1-5 vcf_to_zarr.sbatch
+
+
+
+#################
+#convert vcf files to zarr files
+#################
+sbatch --array 1-5 split_vcf_by_chr.sbatch
