@@ -1,34 +1,34 @@
 #get window D statistics for sim_ssh_sech_mel using all sech samples
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sim \
-                                                                                                       ssh \
-                                                                                                       sech \
-                                                                                                       mel \
-                                                                                                       50000 \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                            ssh \
+                                                                                            sech \
+                                                                                            mel \
+                                                                                            50000 \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 
 #get window D statistics for sim_ssh_sechbase_mel using only sech samples from Anro, La Digue, and Marianne
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sim \
-                                                                                                       ssh \
-                                                                                                       sechbase \
-                                                                                                       mel \
-                                                                                                       50000 \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                            ssh \
+                                                                                            sechbase \
+                                                                                            mel \
+                                                                                            50000 \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
                                                                                                        
 
 
 #get window D statistics for sim_ssh_sechpras_mel using only sech samples from Praslin
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sim \
-                                                                                                       ssh \
-                                                                                                       sechpras \
-                                                                                                       mel \
-                                                                                                       50000 \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
-                                                                                                       
+                                                                                            ssh \
+                                                                                            sechpras \
+                                                                                            mel \
+                                                                                            50000 \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                            
                                                                                                                                                                                                               
 #create pdf reports for D statistic windows                                                                                                       
 Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/d_plus_windows.R 50000 sim_ssh_sech_mel
@@ -48,8 +48,8 @@ python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_poly_w
 
 #get divergence stats for windows across the genome
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_poly_diff_windows.py 50000 mel \
-                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                               /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                               /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 
@@ -90,10 +90,10 @@ Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/outlier_wi
 
 #additional steps to get bordering windows for pi_sech peaks to help better identify breakpoints for putative inversions
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_neighbor_sites.py 50000 \
-                                                                                               pi_sech \
-                                                                                               sim_ssh_sech_mel \
-                                                                                               /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                               /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                        pi_sech \
+                                                                                                        sim_ssh_sech_mel \
+                                                                                                        /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                        /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/outlier_wins.R 50000 neighbor_pi_sech sim_ssh_sech_mel
 
@@ -101,48 +101,48 @@ Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/outlier_wi
 
 #get alleles for all sech samples for sites in outlier D+ windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sech \
-                                                                                                            d_plus \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                 sech \
+                                                                                                 d_plus \
+                                                                                                 sim_ssh_sech_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 #get alleles for all sech samples for sites in the random "outlier" windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sech \
-                                                                                                            random \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                 sech \
+                                                                                                 random \
+                                                                                                 sim_ssh_sech_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 #get alleles for all sech samples for sites in outlier pi sech windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            sech \
-                                                                                                            pi_sech \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                 sech \
+                                                                                                 pi_sech \
+                                                                                                 sim_ssh_sech_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 #look at sech and ssh alleles to see if putative sech inversions are also present in ssh (spoiler: they don't seem to be)
 #get alleles for all ssh samples for sites in outlier D+ windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            ssh \
-                                                                                                            d_plus \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                 ssh \
+                                                                                                 d_plus \
+                                                                                                 sim_ssh_sech_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 #get alleles for all ssh samples for sites in outlier pi sech windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_alleles.py 50000 \
-                                                                                                            ssh \
-                                                                                                            pi_sech \
-                                                                                                            sim_ssh_sech_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                            /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                 ssh \
+                                                                                                 pi_sech \
+                                                                                                 sim_ssh_sech_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 
@@ -151,21 +151,21 @@ python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlie
 #The distance is helpful for easily visualizing the divergent haplotypes seen in sech for many of the outlier D+ and pi sech windows.
 #get allele distances for D+ outlier windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              d_plus \
-                                                                                                                              sim_ssh_sech_mel \
-                                                                                                                              /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                                   d_plus \
+                                                                                                                   sim_ssh_sech_mel \
+                                                                                                                   /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 #get allele distances for random "outlier" windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              random \
-                                                                                                                              sim_ssh_sech_mel \
-                                                                                                                              /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                                   random \
+                                                                                                                   sim_ssh_sech_mel \
+                                                                                                                   /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 #get allele distances for pi sech outlier windows
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/make_outlier_pi_sech_win_adj_allele_dists.py 50000 \
-                                                                                                                              pi_sech \
-                                                                                                                              sim_ssh_sech_mel \
-                                                                                                                              /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                                   pi_sech \
+                                                                                                                   sim_ssh_sech_mel \
+                                                                                                                   /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 
 
@@ -189,8 +189,8 @@ Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/outlier_se
 #Calculate dxy between samples and sech anro for windows
 #These dxy values can be used to see if samples that are more or less diverged to sech anro in outlier windows are also similarly diverged genome wide
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_sech_anro_dxy_windows.py 50000 \
-                                                                                                              /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-                                                                                                              /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                   /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
+                                                                                                   /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 #Make pdf showing sech anro dxy values for sech and ssh pops across the genome and how they relate to pi sech
 Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/sech_anro_dxy_windows.R 50000 sim_ssh_sech_mel
