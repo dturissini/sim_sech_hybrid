@@ -12,23 +12,23 @@ Most of the scripts are written in python, R, and bash. Two sqlite databases are
 The starting vcf file only had samples from the D. simulans clade and lacked an outgroup. Alleles from the D. melanogaster reference genome were added to the vcf to serve as an outgroup. The vcf was then split by chromosomes and the chromomosome-specific vcfs then converted to the zarr file format to facilitate more efficiently obtaining genotype data for subsequenct steps. Commands for the steps to make the vcf and zarr files can be found in make_ssh_vcf_and_zarr_steps.txt.
 
 1. Make two species alignment of D.simulans and D. melanogaster (mel) to facilitate identifying mel alleles based on sim genomic positions. 
-  - cactus_hal2maf.sbatch usess the cactushal2maf program to read a  multispecies hal file and ouyt D. melabnogaster sequences aligned to the D. simulans reference genome.
+    * cactus_hal2maf.sbatch usess the cactushal2maf program to read a  multispecies hal file and ouyt D. melabnogaster sequences aligned to the D. simulans reference genome.
 
 2. Convert maf file to fasta file
-  - maf_to_fasta.sbatch converts the maf file to a full genome (D. simulans) fasta file
-  - Calls the python script make_outgroup_fasta_from_maf.py
+    * maf_to_fasta.sbatch converts the maf file to a full genome (D. simulans) fasta file
+    * Calls the python script make_outgroup_fasta_from_maf.py
 
 3. Add D. melanogaster (mel) alleles to D. simulans clade vcf as an outgroup
-  - add_mel_to_sim_vcf.sbatch processed the D. simulans clade vcf file and outputs a new vcf with the D. melanogaster alleles added. Sincewe're using the haploid D. melnogaster reference genome, all sites are assumed to be homozygous.
-  - Calls the python script add_outgroup_to_vcf.py
+    * add_mel_to_sim_vcf.sbatch processed the D. simulans clade vcf file and outputs a new vcf with the D. melanogaster alleles added. Sincewe're using the haploid D. melnogaster reference genome, all sites are assumed to be homozygous.
+    * Calls the python script add_outgroup_to_vcf.py
     
 4. Split vcf by chromosomal arm into separate vcf files
-  - split_vcf_by_chr.sbatch uses vcftools to split the vcf file into spearate vcf files for each chromosome arm to allow for parallelization across chromosome arms by downstream analyses.
+    * split_vcf_by_chr.sbatch uses vcftools to split the vcf file into spearate vcf files for each chromosome arm to allow for parallelization across chromosome arms by downstream analyses.
 
     
 5. Convert vcf files to zarr files to speed up accessing genotype data by subsequent scripts
-  - sbatch vcf_to_zarr.sbatch 
-  - Calls the python script filtered_vcf_to_zarr.py
+    * sbatch vcf_to_zarr.sbatch 
+    * Calls the python script filtered_vcf_to_zarr.py
 
 
 ### Prepare metadata
@@ -37,10 +37,10 @@ The analysis relies on a number of sqlite database tables to store metadata rela
 1. Make chrom_lens table to store the length of chromosome arms for use when creating windows along chromosomes and populate it with a sql query
 
 2. Make sample_species table to identify which species each sample is from. The table also contains the collection location for each sample (where available) and the relative column in the vcf file for that sample to simplify indexing when processing vcf and zarr files.
-  - get_filtered_metadata.py is run to create and populate the table
+    * get_filtered_metadata.py is run to create and populate the table
 
 3. Make sample_pop_link table to link each sample to populations (pops). Pops are either the the species (mel, sim, sech, ssh) or subpopulations defined by islands in the Seychelles. 
-  - make_sample_pop_link.py is run to create and populate the table
+    * make_sample_pop_link.py is run to create and populate the table
 
 4. Make pop_cols table assigning a specific color to each pop found in sample_pop_link to standardize pop colors across all plots and populate it with a sql query
 
@@ -71,15 +71,15 @@ Note that this section of the analysis consistently used sim, ssh, and mel as po
 1. get_d_stat_windows.py reads zarr files and divides the genome into windows and records D statistics and ABBA, BABA, ABAA, and BAAA counts in a database table with the prefix "d_stat_win_". 
 
 2. d_plus_windows.R reads the D stat and ABBA BABA count data from the database table and makes a series of plots in a pdf file.
-  * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
-  * Histograms of ABBA BABA counts to help visualize any outliers and set a useful threshold for windows with too informative sites
-  * Scatterplot of nuymber of sites versus total AB sites with red lines showing cutoff thresholds
-  * D+ distribution with a red line denoting the 99th quantile used for identifying outliers in downstream analyses
-  * Scatterplots of different AB counts versus D+
-  * Traces of per-window D+ across each chromosome arm with significant SNPs from a GWAS run on octanoic acid resistance in ssh flies
-  * Scatterplots of D+ versus the component ABBA-BABA and BAAA-ABAA components to help better understand the statistic and visualize outliers
-  * Scatterplot of GWAS p-values vs D+ for the respective genomic window for each significant SNP
-  * Scatterplots of D+ versus the percent of sites for the window that are ABBA or BAAA to help better understand their respective contributions 
+    * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
+    * Histograms of ABBA BABA counts to help visualize any outliers and set a useful threshold for windows with too informative sites
+    * Scatterplot of nuymber of sites versus total AB sites with red lines showing cutoff thresholds
+    * D+ distribution with a red line denoting the 99th quantile used for identifying outliers in downstream analyses
+    * Scatterplots of different AB counts versus D+
+    * Traces of per-window D+ across each chromosome arm with significant SNPs from a GWAS run on octanoic acid resistance in ssh flies
+    * Scatterplots of D+ versus the component ABBA-BABA and BAAA-ABAA components to help better understand the statistic and visualize outliers
+    * Scatterplot of GWAS p-values vs D+ for the respective genomic window for each significant SNP
+    * Scatterplots of D+ versus the percent of sites for the window that are ABBA or BAAA to help better understand their respective contributions 
 
 
 #### Polymorphism
@@ -90,26 +90,26 @@ Polymorphism was then measured both within and between populations for genomic w
 2. get_poly_diff_windows.py reads zarr files and calculates several between population measurements of variation (Dxy, Fst, and difference of derived allele frequencies). Between population comparisons are only run on the most relevant subset of combinations of pops to reduce unnecessary computation. Results are stored in a database table with the prefix "poly_diff_win_".
 
 3. poly_windows.R generates a pdf with plots for both polymorphism and D stat results. The R script takes as input the window size but also the four populations used for D+ statistic. The 3 pops (excluding outgroup) whose polymorphism data is plotted are obtained by parsing this string (e.g. sim_ssh_sech_mel).
-  * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
-  * Histograms of per-window pi for sim, sech, and ssh
-  * Histograms of per-window derived allele frequencies (mel as outgroup) for sim, sech, and ssh
-  * Histograms of per-window pairwise differences for derived allele frequencies (mel as outgroup) for sim, sech, and ssh
-  * Histograms of Dxy for all pariwise combinations of sim, sech, and ssh
-  * Histograms of Fst for all pairwise combinations of sim, sech, and ssh
-  * Per site derived allele frequency distributions for sim, sech, and ssh
-  * Traces of per-window values for several measurements to help visualize both their distribtuons across the genome and any potential correlations.
-      * Significant GWAS SNPs and their p-values for octanoic acid resistance in ssh
-      * AB site counts
-      * D+
-      * pi
-      * Dxy
-      * Fst
-      * Derived allele frequencies
-  * If sech is one of the pops, then a number of additional plots are made
-      * Scatterplot of pi sech versus D+ is plotted to see if D+ outlier windows have higher pi sech
-      * Scatterplot of BAAA-ABAA vs pi sech with points colored to reflect D+ value
-      * Scatterplot of BAAA-ABAA vs D+ with points colored and size-scaled to reflect pi sech value
-      * Scatterplot of ABBA-BABA vs D+ with points colored and size-scaled to reflect pi sech value
+    * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
+    * Histograms of per-window pi for sim, sech, and ssh
+    * Histograms of per-window derived allele frequencies (mel as outgroup) for sim, sech, and ssh
+    * Histograms of per-window pairwise differences for derived allele frequencies (mel as outgroup) for sim, sech, and ssh
+    * Histograms of Dxy for all pariwise combinations of sim, sech, and ssh
+    * Histograms of Fst for all pairwise combinations of sim, sech, and ssh
+    * Per site derived allele frequency distributions for sim, sech, and ssh
+    * Traces of per-window values for several measurements to help visualize both their distribtuons across the genome and any potential correlations.
+        * Significant GWAS SNPs and their p-values for octanoic acid resistance in ssh
+        * AB site counts
+        * D+
+        * pi
+        * Dxy
+        * Fst
+        * Derived allele frequencies
+    * If sech is one of the pops, then a number of additional plots are made
+        * Scatterplot of pi sech versus D+ is plotted to see if D+ outlier windows have higher pi sech
+        * Scatterplot of BAAA-ABAA vs pi sech with points colored to reflect D+ value
+        * Scatterplot of BAAA-ABAA vs D+ with points colored and size-scaled to reflect pi sech value
+        * Scatterplot of ABBA-BABA vs D+ with points colored and size-scaled to reflect pi sech value
       
 
 #### Outlier windows
@@ -120,11 +120,11 @@ Outlier windows for pi sech, D+  were identified using the 99th quantile as the 
   2. get_outlier_win_neighbor_sites records the same information as get_outlier_win_sites.py but processes windows neighboring outlier windows. This script is run for pi sech outlier windows to record information for snps which may still be part of the diverged haplotypes (observed in subsequent steps) that could extend beyon the boundaries of the outlier windows.
 
   3. outlier_wins.R generates a pdf with a page for each of the outlier windows: pi sech, D+, or random which are passed in as a parameter. Each window plot has several panels:
-    * Scatterplots of dervied allele frequencies for each polymorphic site in the window. There is a separate panel for each of sim, sech, and ssh
-    * A histogram to the right of the scatterplot showing the distribution of derived allele frequencies.
-    * A separate scatterplot of derived allele frequencies for all of the sech pops (defined by Seychelles geography)
-    * Traces of histogram counts showing the distribution of derived allele frequencies for each sech pop.
-    * Additionally, transparent gray bars show the location of annotated genes in the window and vertical black lines indicate significant SNPs from the ssh octanoic acid GWAS. D+ and the genomic D+ quantile are also printed in the upper-right corner.
+      * Scatterplots of dervied allele frequencies for each polymorphic site in the window. There is a separate panel for each of sim, sech, and ssh
+      * A histogram to the right of the scatterplot showing the distribution of derived allele frequencies.
+      * A separate scatterplot of derived allele frequencies for all of the sech pops (defined by Seychelles geography)
+      * Traces of histogram counts showing the distribution of derived allele frequencies for each sech pop.
+      * Additionally, transparent gray bars show the location of annotated genes in the window and vertical black lines indicate significant SNPs from the ssh octanoic acid GWAS. D+ and the genomic D+ quantile are also printed in the upper-right corner.
 
   4. get_outlier_win_alleles.py records the number of derived alleles for each site for each sample for all polymorphic sites in out lier windows (pi sech, D+, or random) and stores the results in a database table
   
@@ -135,10 +135,10 @@ Outlier windows for pi sech, D+  were identified using the 99th quantile as the 
   7. get_sech_anro_dxy_windows.py calcualtes Dxy between each sech pop and sech anro for windows across the genome and stores the results in a database table.
   
   8. sech_anro_dxy_windows.R generates a pdf with plots showing the window sech anro Dxy results from the previous step. 
-    * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
-    * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
-    * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
-    * Histograms for each sech sample of Dxy compared against sech anro
+      * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
+      * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
+      * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
+      * Histograms for each sech sample of Dxy compared against sech anro
   
   
 ## D. simulans into D. sechellia introgression
