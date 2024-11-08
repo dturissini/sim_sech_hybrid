@@ -32,7 +32,7 @@ The starting vcf file only had samples from the D. simulans clade and lacked an 
 
 
 ### Prepare metadata
-The analysis relies on a number of sqlite database tables to store metadata related to the samples and populations. Steps to prepare the metadata can be found in make_ssh_metadata_steps.txt
+The analysis relies on a number of sqlite database tables to store metadata related to the samples and populations. ssh_d_win.db is created to store the metadata. Steps to prepare the metadata can be found in make_ssh_metadata_steps.txt
 
 1. Make chrom_lens table to store the length of chromosome arms for use when creating windows along chromosomes and populate it with a sql query
 
@@ -64,6 +64,8 @@ D and D+ statistics were calculated for each chromosome arm using RIPTA.
 
 ### Genomic windows
 After identifying evidence of introgression at the genomic level, we next applied a window-based approach to try to identify specific regions with introgression. The D+ was statistic was used since it's been shown to have much better accuracy than D when applioed to genomic windows. Commands for running the steps described below can be found in sech_into_ssh_introgression_windows_steps.txt
+
+The same ssh_d_win.db database that contains the metadata is also used to restore results for the analyses described below.
 
 Note that this section of the analysis consistently used sim, ssh, and mel as populations 1, 2, and 4 respectively within the ABBA-BABA D statistic framework, but multiple populations of D. sechellia were tested as population 3 including all sech samples as well as subpopulations defined based on geography of the Seychelles archipelago. Samples for the subpopulations were recorded in the sample_pop_link database table described in the Prepare Metadata section above.
 
@@ -151,56 +153,54 @@ Commands for running the steps described below can be found in sim_into_sech_int
 
 
 ## Inversion checks
-To investigate putative inversions, several D. sechellia lines were sequenced using Oxford Nanopore, and their genomes were assembled using Canu. Note that the fly lines were intially sequenced over a decade ago, anbd many were, unfortunately, lost during COVID. So it was not always possible to sequence the specif D. sechellia lines from Denis, and additional Denis lines were also sequenced with the expectation that any inversions segregating in the population could also be found in them too.
+To investigate putative inversions, several D. sechellia lines were sequenced using Oxford Nanopore, and their genomes were assembled using Canu. Note that the fly lines were intially sequenced over a decade ago, anbd many were, unfortunately, lost during COVID when access to the lab was restricted. So it was not always possible to sequence the specif D. sechellia lines from Denis, and additional Denis lines were also sequenced with the expectation that any inversions segregating in the population could also be found in them too.
 
 Note that the inversion checks are actively being worked on, and we are currently waiting on the results of the next round of Oxford Nanopore sequencing following the lab updating sample preparation protocols.
 
 ### Genome assembly
-CLEANUP sech assembly steps txt
+Steps used to assemble the genomes using canu can be found in sech_assembly_steps.txt.
+
+  1. Install canu
+  2. Create directories for results
+  3. Prepare fastq files
+  4. Run canu for each sample toa ssemble the genome by submitting a slurm array using canu_sech_genomes.sbatch. Note that several of the canu runs expectedly stopped, but were able to restart by just resubmitting the can job for the affected samples.
+  5. Download the D. simulans reference genome and rename chromosomes (This step could also be moved to the inversion check stage)
 
 ### Look for putative inversions
-inversion_check_steps.txt
+inversion_check_steps.txt contains the steps run to look for putative inversions identifed from the diverged haplotypes in sech denis and desc praslin seen in the introgression analysis. In many cases neighobroing windows were combined, and the plots were manually reviewed to define rough start and end positions where the breakpoints for possible inversions should be found. Inversion checks were run for both raw reads and assembled contigs. The focus was to try to identify a read or contig that was split and mapped to two different locations to the reference D. simulans genome indicating an inversion breakpoint within the read/contig. Since many of the original D. sechellia lines had died off in the lab and were no longer available, other sech denis samples were sequenced, and their alleles were compared to the reference sech anro sample to try to identify assembled genomes that had the diverged haplotypes seen in the samples with Illumina sequence data.
 
-#### Raw reads
+denis_possible_inversions.txt was created as a tab-delimted text file with a line for each putative inversion containing a unique inversion name, chromosome, start, and end. 10 of the random "outlier" windows were also selcted and included to compare against.
 
-##### Map long reads to reference genome
-python3 process_inversion_overlaps.py trimmedReads
+#### Map long reads/contigs to reference genome
+The steps below can be run on either contigs or reads using an input parameter unless otherwise noted. Many of these scripts take a single sample id as input. This is because the genome assemblies were finishing days apart, and some did not have enough coverage to proudce usable assembled genomes. So it was just easier to run the downstream steps individually for each sample rather than handle filtering and array submissions.
 
-sbatch inversion_check_lastz_reads.sbatch sech_Denis_NF69
-
-identify sech Anro alleles for polymorphic sites within putative inversions by looking at illumina data
-python3 get_inversion_sech_alleles.py /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel \
-
-get number of derived and sech anro alleles for reads overlapping putative inversions
-python3 get_derived_alleles_from_mafs_reads.py 
-
-look at anro allele concordance for reads overlapping putative inversions
-Rscript inversion_check_per_der_reads.R
+  1. Map read/contig to ref genome using minimap using the inversion_check_minimap.sbatch
+  2. Identify the reads/contigs that overlap with putative inversions, and write the locations to a text file that can be subsequently parsed
+      * find_inversion_overlaps_in_minimap_results.py
+  3. Process the minimap inversion overlap results and store them in a sqlite database (minimap_results.db) 
+      * process_inversion_overlaps.py
+  4. Plot the reads/contigs that overlap with putative inversions with inversion_check_contig_map.R. The plot contains two panels:
+      * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
+      * contigs/reads with one per line. Those that map in more than one piece are colored red to draw attention to them.
 
 
-look at anro allele concordance for reads overlapping putative inversions, coloring reads by their amount of anro allele concordance
-Rscript inversion_check_per_der_reads_inversion_plots.R
+#### Look for differentiated haplotypes in reads/contigs
+Since some of the samples that were sequenced with Oxford Nanopore were not part of the original dataset, we also wanted to check if they had the differentiated haplotypes we had previously seen. Minimap does not return sequences, so LastZ was used to map just the reads/contigs that overlapped with putative inversions. Lastz alignments were then parsed to identify the alleles for sites present in the Illumina sequenced vcf analysis.
 
+Note that this analysis is still ongoing as we await additional Oxford Nanopore sequencing results.
 
+  1. Map the reads/contigs that Minimap found overlapped with putative inversions against the reference genome with lastZ with inversion_check_lastz_reads.sbatch
+      * Calls inversion_check_lastz.py
+  2. Identify sech anro alleles for polymorphic sites within putative inversions by looking at illumina data with get_inversion_sech_alleles.py
+  3. Get the number of derived and sech anro alleles for reads/contigs overlapping putative inversions
+      * python3 get_derived_alleles_from_mafs_reads.py 
+      * python3 get_derived_alleles_from_contig_mafs.py 
+  4. Look at anro allele concordance for reads overlapping putative inversions using inversion_check_per_der_reads.R. The R script makes a pdf with plots looking at the histograms of sech anro alleles concordance across all putative inversions and for each putative inversion. Anro allele concordance is just the proportion of alleles that are the same with the representative sech anro allele. The expectation is that a diverged haplotype will have a concordance near zero, and an individuyal heterozygous for the two haplotypes will have an anro allele concordance near 0.5. 
+  5. Look at anro allele concordance for reads overlapping putative inversions, coloring reads by their amount of anro allele concordance using inversion_check_per_der_reads_inversion_plots.R. The R script creates a pdf file with one page per putative inversion containing:
+      * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
+      * Scatterplot of the read derived allele frequency. A blue line denotes the average frequency for 2kb windows across the region.
+      * Scatterplot of the read sech anro allele frequency. A red line indicates the average frequency for 2kb windows across the region.
+      * The mapped reads plotted one per line. The reads are colored by their level of anro allele concordance with blue denoting low concordance, green indicating around 50% concordance, and red denoting high concordance. Extended regions of blue reads should indicate a haplotype diverged from sech anro.
 
-
-##### Plot aligned reads that overlap putative inversions
-Rscript inversion_check_contig_map.R 50000 sech_Denis_NF22 trimmedReads
-
-
-#### Assembled contigs
-
-##### Map contigs to reference genome
-python3 process_inversion_overlaps.py contigs
-
-LastZ used to get sequnece alignments
-sbatch inversion_check_lastz.sbatch sech_Denis_NF22
-
-get number of derived and sech anro alleles  for contigs overlapping putative inversions
-python3 get_derived_alleles_from_contig_mafs.py 
-
-
-##### Plot aligned contigs that overlap putative inversions
-Rscript inversion_check_contig_map.R 50000 sech_Denis_NF22 contigs
 
 
