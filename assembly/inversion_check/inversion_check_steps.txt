@@ -58,6 +58,8 @@ Rscript inversion_check_contig_map.R 50000 sech_Anro_114_female trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF69 trimmedReads
 
 
+
+
 #map with lastz the contigs identified by minimap that overlap putative inversions
 sbatch inversion_check_lastz.sbatch sech_Denis_NF22
 sbatch inversion_check_lastz.sbatch sech_Denis_NF49
@@ -74,7 +76,7 @@ python3 get_derived_alleles_from_contig_mafs.py
 
 
 
-#map with lastz the contigs identified by minimap that overlap putative inversions
+#map with lastz the reads identified by minimap that overlap putative inversions
 sbatch inversion_check_lastz_reads.sbatch sech_Denis_NF69
 sbatch inversion_check_lastz_reads.sbatch sech_Anro_114_female
 

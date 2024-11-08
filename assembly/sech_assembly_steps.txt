@@ -1,26 +1,14 @@
-#initial notes from conversation with Dmitry
-minimap 2 for mapping
-canu does telomoeres better
-
-Flye
-Start with canu
-
-
-
-
 #install canu
 cd /proj/matutelb/software/
 curl -L https://github.com/marbl/canu/releases/download/v2.2/canu-2.2.Linux-amd64.tar.xz --output canu-2.2.Linux.tar.xz
 tar -xJf canu-2.2.Linux.tar.xz
 
 
-
+#make directories
 cd /work/users/d/t/dturissi/drosophila/ssh/introgression
 
 mkdir assembly
 mkdir assembly/logs
-
-
 
 cd  /work/users/d/t/dturissi/
 mkdir -p drosophila/ssh/assembly
@@ -29,24 +17,15 @@ cd  /work/users/d/t/dturissi/drosophila/ssh/assembly
 
 
 
-
+#make fastq directory and copy over fastq files from read-only directory, and change the file extension since they were not actually zipped
 mkdir fastqs
 cp /proj/matutelb/projects/sech_7_19_24/sech_Denis_NF49.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/introgression/assembly/fastqs/sech_Denis_NF49.fastq
-
-#sech_Denis_NF49
-mkdir sech_Denis_NF49
 
 mkdir assemblies
 
 
+#start canu jobs to assemble seprate genomes for each sample
 sbatch canu_sech_genomes.sbatch
-
-/proj/matutelb/software/canu-2.2/bin/canu -p sech_Denis_NF49 \
-                                          -d assemblies/sech_Denis_NF49 \
-                                          genomeSize=130m \
-                                          -nanopore /work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/sech_Denis_NF49.fastq \
-                                          -gridOptions="--time=72:00:00 --partition=general"
-
 
 
 
@@ -55,171 +34,4 @@ sbatch canu_sech_genomes.sbatch
 #rename ref genome chromosomes
 ./rename_ref_genome_chroms.sh
 
-module add minimap2/2.26
-sbatch run_minimap2.sbatch
 
-
-
-#try to identify inversion
-samtools view -b -o sech_Denis_NF49.bam sech_Denis_NF49.sam
-samtools sort sech_Denis_NF49.bam > sech_Denis_NF49_sorted.bam 
-samtools index sech_Denis_NF49_sorted.bam  
-samtools view -h sech_Denis_NF49_sorted.bam 3R:27960000-28050000 > sech_Denis_NF49_3R_28M_inv.sam
-
-python3 process_minimap_sam_file.py sech_Denis_NF49_3R_28M_inv.sam
-
-sqlite3 minimap_results.db
-select read_name, count(*), max(start) - min(start) max_dist 
-from minimap_results 
-group by read_name 
-having count(*) > 1 
-order by max_dist desc;
-c1217db2-412f-4cfc-97c8-3c4d5f150fdb|2|19348
-6608cc13-57a6-4ac5-b7cd-a66a8e13f58e|2|17879
-e6d828ee-3196-46f8-af2f-fa5c7d380198|2|15963
-42cefd20-4b72-46d4-a111-70ed543b9bd4|3|13506
-15c06aaa-8060-4ad5-9024-87e2f947dd8e|2|8758
-2deba8d1-9bed-4570-b915-f8eb71efb4bb|2|7919
-3a0d03f4-a227-4840-94ff-258952841f13|2|5375
-771a03e3-69c3-48cf-a93d-f6f41867e89f|2|3333
-6372cb6d-13e6-4452-a5c1-a6e876e05a2c|2|2803
-e0919ac5-2acb-4b70-9b5f-8375bb1cdae1|2|2196
-19690da9-72ec-4fbe-94c4-0e088753052c|2|1410
-aa2914b8-ed1d-4193-8c10-0d727ea43a26|2|1125
-e744f9de-977e-4a86-b659-0bb1075de09e|2|1075
-4ec16b88-0b65-41cb-b5b0-13e3d5b8a349|2|745
-b0311b1d-d93b-49fc-8a74-fba3055f2c9c|2|636
-009467d9-f1db-43b2-b406-c1483427053c|2|459
-a10f1f1e-4334-41c5-9272-990c44b87856|2|407
-ea93da3c-e74e-4ccf-9fb0-583b1f1b4f21|2|401
-aba843ca-7ff3-47b7-9a77-6c38b375fe08|2|369
-ae70129f-e817-4656-b1a3-ceb44da3b2ef|2|340
-fbc253ab-41e1-4b43-971b-6b66e35ea104|2|313
-d4f71c36-99b6-42ab-966b-356fed49a30c|2|284
-f91d6e7f-2c5e-41b6-9fed-b3d9811baa9c|2|259
-df6fe99d-72ab-497b-8caf-b8a3c9570224|2|256
-527a32e5-1855-48ad-b777-bc2ad85d8bad|2|233
-c54c84b2-7955-4001-a861-10eb475d8609|2|207
-2add1090-06eb-4ee3-9da9-54518eedbf3e|2|178
-4d7d6c00-177a-4ca1-bdb6-2f71e010f3b3|2|130
-64667ada-db46-4b99-953a-4ea7f5bb2cf6|2|104
-d6cad306-0163-4596-8627-c40547d3b643|2|72
-c2fae00a-9b97-44df-8ba7-34de7fa861b8|2|64
-b0440d5a-97b9-48ea-897a-bdf1c2ed819b|2|64
-6d21fd76-ca07-471a-8fdd-8891f18ef4e3|2|58
-ea87377f-ca15-4f61-956a-c25877cca57e|2|48
-24b178da-a9a4-4168-bb03-bb4dbe57e800|2|48
-1648a19b-d5d9-44ed-b45a-70e8d46ba152|2|46
-d5458525-13cc-4789-b683-5c3d0f942589|2|44
-945745f3-66d8-4421-bc01-151c2277461c|2|43
-e0c4e8dc-22e7-4b3a-8c04-6208c5bc25b2|2|39
-afa9858e-ebc6-4be7-b17c-e62970a1f0dd|2|31
-714e54dc-0786-4e3d-b91e-8f417333c76b|2|22
-fab7ed69-b842-4aaa-b3d1-cf02bea4afdf|2|18
-bf26ed1b-7122-4f1d-802e-41636795d0d3|2|14
-74408857-9c9f-40fd-983f-166e60e2600a|2|14
-d6c7dba9-5bca-4513-95d6-d377be0608ee|2|11
-88d35ee9-2243-4f36-ae85-384869bda2d5|2|11
-51969241-3b4f-467c-beb8-d35eec5b8296|2|11
-10dec761-ef9a-44ff-8aee-6d0c6f5dbec2|2|10
-29a21530-5d26-4c4a-b789-795b14038df9|2|8
-f9c444f3-0220-4102-b0ec-2a6f525a551e|2|5
-ea6b710e-8c48-4795-b7d1-9a2ad3055eb5|2|5
-ff2c19f2-2195-4244-b121-299e38fa50f6|2|4
-ebc8d075-404c-427d-90da-ab91ef875326|2|4
-b05c2879-d054-416a-af09-8c8865b38061|2|4
-aea9f14d-ddf4-4882-a433-9336ff2d8e73|2|4
-a542078c-d95a-45e0-af7a-dd8f6e3ab3bc|2|4
-8e282bba-7917-4f5b-838f-d7f1e1d8be44|2|4
-51a49328-3770-4696-96e1-709b83584b18|2|4
-a70613db-3da5-447c-b12c-d0ab9b12528f|2|3
-861cdaa4-a3d1-4662-96f5-1f0a00787e67|2|3
-0fd57838-f80d-44de-aa97-7c8431ad8622|2|3
-aefab805-cb59-4b43-adda-47394df07b73|2|2
-5d823edd-6a2e-4ac0-b0ec-dacc1bac78cc|2|2
-57e04634-c121-4aae-ac3d-b4dc61a28554|2|2
-c1b66867-c585-41f9-bfd9-3ab2a32d02e1|2|1
-613bafd2-ecbf-45ba-acaa-7000d670909b|2|1
-e27c7a56-c20e-42a9-af4b-95ddfbc7c7f7|2|0
-a7d3a01a-242b-4196-8ac5-9dcd180fd1a6|2|0
-9a3540ab-71da-4087-911d-4c656d6ff64a|2|0
-8c73ab78-3539-45d1-b9bc-afb116355ace|2|0
-88b50ca0-e919-453a-8b9c-60175ad7350e|2|0
-82afefd0-61b8-434c-b626-6c8d1e15818e|2|0
-73c918fd-90f4-4231-815d-1030f6202ee5|2|0
-6b7cf0b2-5726-4ceb-ab07-326074b52b3c|2|0
-68029e69-6949-440d-b059-771074356d93|2|0
-5a17506f-3596-4010-802d-6531c4e9abba|2|0
-55cf6575-8c74-42db-899f-308b3eea8efe|2|0
-150aff00-633b-4c21-9094-6ec6453c17ad|2|0
-1283a0b0-8eea-4e64-8953-f96b5337c749|2|0
-09e8963e-ef50-449c-862c-a98d07b1e1c2|2|0
-093db2a4-5bd1-4681-916c-6a799601275c|2|0
-08b2d01f-6103-4772-afe2-08f53e170f78|2|0
-
-
-
-select * 
-from minimap_results
-where read_name in (
-'c1217db2-412f-4cfc-97c8-3c4d5f150fdb',
-'6608cc13-57a6-4ac5-b7cd-a66a8e13f58e',
-'e6d828ee-3196-46f8-af2f-fa5c7d380198',
-'42cefd20-4b72-46d4-a111-70ed543b9bd4')
-order by read_name, start;
-
-
-
-select * 
-from minimap_results
-where contig_name in (
-'c1217db2-412f-4cfc-97c8-3c4d5f150fdb',
-'6608cc13-57a6-4ac5-b7cd-a66a8e13f58e',
-'e6d828ee-3196-46f8-af2f-fa5c7d380198',
-'42cefd20-4b72-46d4-a111-70ed543b9bd4')
-order by contig_name, start;
-199|42cefd20-4b72-46d4-a111-70ed543b9bd4|3R|28023152
-240|42cefd20-4b72-46d4-a111-70ed543b9bd4|3R|28036551
-241|42cefd20-4b72-46d4-a111-70ed543b9bd4|3R|28036658
-
-142|6608cc13-57a6-4ac5-b7cd-a66a8e13f58e|3R|28004767
-198|6608cc13-57a6-4ac5-b7cd-a66a8e13f58e|3R|28022646
-213|c1217db2-412f-4cfc-97c8-3c4d5f150fdb|3R|28030151
-272|c1217db2-412f-4cfc-97c8-3c4d5f150fdb|3R|28049499
-44|e6d828ee-3196-46f8-af2f-fa5c7d380198|3R|27967497
-96|e6d828ee-3196-46f8-af2f-fa5c7d380198|3R|27983460
-
-
-
-3426|42cefd20-4b72-46d4-a111-70ed543b9bd4|15605|6|15605|3R|28024331|28040000
-1329|6608cc13-57a6-4ac5-b7cd-a66a8e13f58e|53229|7|53228|3R|28004877|28058353
-1551|c1217db2-412f-4cfc-97c8-3c4d5f150fdb|38893|2|38082|3R|28030209|28068490
-
-
-
-
-grep 42cefd20-4b72-46d4-a111-70ed543b9bd4 *.paf
-42cefd20-4b72-46d4-a111-70ed543b9bd4	20681	26	16938	+	3R	28149585	28023152	28040134	15467	17012	60	tp:A:P	cm:i:2616	s1:i:15435	s2:i:0	dv:f:0.0003	rl:i:58
-42cefd20-4b72-46d4-a111-70ed543b9bd4	20681	16940	20385	-	3R	28149585	28036555	28040062	2853	3522	60	tp:A:P	cm:i:434	s1:i:2834	s2:i:0	dv:f:0.0005	rl:i:58
-
-Col	Type	Description
-1	string	Query sequence name
-2	int	Query sequence length
-3	int	Query start (0-based; BED-like; closed)
-4	int	Query end (0-based; BED-like; open)
-5	char	Relative strand: "+" or "-"
-6	string	Target sequence name
-7	int	Target sequence length
-8	int	Target start on original strand (0-based)
-9	int	Target end on original strand (0-based)
-10	int	Number of residue matches
-11	int	Alignment block length
-12	int	Mapping quality (0-255; 255 for missing)
-
-
-
-select contig_name, chrom, count(*), max(start) - min(start) max_dist 
-from minimap_results 
-group by contig_name, chrom
-having count(*) > 1 
-order by max_dist desc;
