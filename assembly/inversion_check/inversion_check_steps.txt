@@ -38,8 +38,8 @@ python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF69 trimmedRea
 
 
 #store inversion overlaps in db table
-python3 process_inversion_overlaps.py contigs
-python3 process_inversion_overlaps.py trimmedReads
+python3 process_inversion_overlaps.py contigs trimmedReads
+
 
 
 #plot contigs that overlap with putative inversions based on minimap

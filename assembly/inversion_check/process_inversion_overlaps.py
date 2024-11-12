@@ -4,14 +4,22 @@ import tempfile
 import sys
 import re
 import glob
+import argparse
 
-#python3 process_inversion_overlaps.py inversion_overlaps_contigs/*inv_overlap_contigs.txt contigs
+#python3 process_inversion_overlaps.py inversion_overlaps_contigs/*inv_overlap_contigs.txt -l contigs trimmedReads
 
 
+def parse_args():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("seq_types", metavar='N', type=str, nargs='*')
+
+  
+  return parser.parse_args()
 
 
 def main():
-  seq_type = sys.argv[1]
+  args = parse_args()
+  seq_types = args.seq_types  
   
   
   db_file = 'minimap_results.db'
@@ -42,22 +50,23 @@ def main():
 
   
   mr_id = 0
-  with tempfile.NamedTemporaryFile(mode='w') as t:
-    for inv_overlap_file in glob.glob(os.path.join('inversion_overlaps_' + seq_type, '*_inv_overlap_' + seq_type + '.txt')):
-      
-      m = re.search(r'.+/(.+)_inv_overlap.+.txt', inv_overlap_file)
-      sample_id = m.group(1)
-      
-      with open(inv_overlap_file, 'r') as i: 
-        for line in i:
-          mr_id += 1
-          line = line.strip()
-          values = line.split('\t')
-                  
-          t.write(f"{mr_id}\t{sample_id}\t{values[0]}\t{values[1]}\t{seq_type}\t{values[2]}\t{values[3]}\t{values[4]}\t{values[5]}\t{values[6]}\t{values[7]}\t{values[8]}\n")   
-                           
-    t.flush()      
-    os.system(f"""sqlite3 {db_file} ".mode tabs" ".import {t.name} minimap_results" """)
+  for seq_type in seq_types:
+    with tempfile.NamedTemporaryFile(mode='w') as t:
+      for inv_overlap_file in glob.glob(os.path.join('inversion_overlaps_' + seq_type, '*_inv_overlap_' + seq_type + '.txt')):
+        
+        m = re.search(r'.+/(.+)_inv_overlap.+.txt', inv_overlap_file)
+        sample_id = m.group(1)
+        
+        with open(inv_overlap_file, 'r') as i: 
+          for line in i:
+            mr_id += 1
+            line = line.strip()
+            values = line.split('\t')
+                    
+            t.write(f"{mr_id}\t{sample_id}\t{values[0]}\t{seq_type}\t{values[1]}\t{values[2]}\t{values[3]}\t{values[4]}\t{values[5]}\t{values[6]}\t{values[7]}\t{values[8]}\n")   
+                             
+      t.flush()      
+      os.system(f"""sqlite3 {db_file} ".mode tabs" ".import {t.name} minimap_results" """)
 
 
 if __name__ == '__main__':

@@ -8,14 +8,17 @@ seq_type <- args[3]
 
 #define file paths
 base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/assembly/inversion_check'
-db_file <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db'
-contig_file <- paste(base_dir, '/inversion_overlaps_', seq_type, '/', sample_id, '_inv_overlap_', seq_type, '.txt', sep='')
 pdf_file <- paste('inversion_check_', sample_id, '_', seq_type, '.pdf', sep='')
+
+db_file <- 'minimap_results.db'
+ssh_db_file <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db'
+
 
 setwd(base_dir)
 
 #db connection
 conn <- dbConnect(dbDriver("SQLite"), db_file)
+ssh_conn <- dbConnect(dbDriver("SQLite"), ssh_db_file)
 
 
 possible_inversions <- read.table('denis_possible_inversions.txt', header=T, sep="\t")
@@ -23,23 +26,25 @@ possible_inversions <- read.table('denis_possible_inversions.txt', header=T, sep
 #define db table
 win_site_table <- paste('outlier_pi_sech_win_neighbor_sites_', win_size, '_sim_ssh_sech_mel', sep='')
 
-contig_overlaps <- read.table(contig_file, header=F, sep="\t")
-names(contig_overlaps) <- c('inv_name', 'contig_name', 'contig_len', 'contig_start', 'contig_end', 'chrom', 'start', 'end')
+contig_overlaps <- dbGetQuery(conn, paste("select inv_name, contig_name, contig_len, contig_start, contig_end, chrom, start, end
+                                           from minimap_results
+                                           where sample_id = '", sample_id, "'
+                                           and seq_type = '", seq_type, "'", sep=''))
 
 
 pdf(pdf_file, height=8, width=10.5)
-for (i in 1:nrow(possible_inversions))
+for (i in which(substr(possible_inversions$name, 1, 4) != 'rand'))
   {
   layout(matrix(c(1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2), nrow=4, byrow=T))
   par(mar=c(0, 4.1, 4.1, 1.1))
   
-  win_sites <- dbGetQuery(conn, paste("select *
-                                       from ", win_site_table, "
-                                       where der_alleles > 0
-                                       and pop = 'sech'
-                                       and chrom = '", possible_inversions$chrom[i], "'
-                                       and pos between ", possible_inversions$start[i], " and ", possible_inversions$end[i], "
-                                       order by pos", sep=''))
+  win_sites <- dbGetQuery(ssh_conn, paste("select *
+                                           from ", win_site_table, "
+                                           where der_alleles > 0
+                                           and pop = 'sech'
+                                           and chrom = '", possible_inversions$chrom[i], "'
+                                           and pos between ", possible_inversions$start[i], " and ", possible_inversions$end[i], "
+                                           order by pos", sep=''))
 
 
   plot(win_sites$pos, win_sites$der_alleles / win_sites$total_alleles, pch=20, col='red', xaxt='n', xlab='', ylim=c(0,1), ylab='Derived freq', main=possible_inversions$name[i])
