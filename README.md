@@ -109,15 +109,16 @@ Note that this section of the analysis consistently used sim, ssh, and mel as po
     * Inputs: 
         * window size
         * D stat pop string (e.g. sim_ssh_sech_mel)
-    * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
-    * Histograms of ABBA BABA counts to help visualize any outliers and set a useful threshold for windows with too informative sites
-    * Scatterplot of nuymber of sites versus total AB sites with red lines showing cutoff thresholds
-    * D+ distribution with a red line denoting the 99th quantile used for identifying outliers in downstream analyses
-    * Scatterplots of different AB counts versus D+
-    * Traces of per-window D+ across each chromosome arm with significant SNPs from a GWAS run on octanoic acid resistance in ssh flies
-    * Scatterplots of D+ versus the component ABBA-BABA and BAAA-ABAA components to help better understand the statistic and visualize outliers
-    * Scatterplot of GWAS p-values vs D+ for the respective genomic window for each significant SNP
-    * Scatterplots of D+ versus the percent of sites for the window that are ABBA or BAAA to help better understand their respective contributions 
+    * Plots
+        * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
+        * Histograms of ABBA BABA counts to help visualize any outliers and set a useful threshold for windows with too informative sites
+        * Scatterplot of nuymber of sites versus total AB sites with red lines showing cutoff thresholds
+        * D+ distribution with a red line denoting the 99th quantile used for identifying outliers in downstream analyses
+        * Scatterplots of different AB counts versus D+
+        * Traces of per-window D+ across each chromosome arm with significant SNPs from a GWAS run on octanoic acid resistance in ssh flies
+        * Scatterplots of D+ versus the component ABBA-BABA and BAAA-ABAA components to help better understand the statistic and visualize outliers
+        * Scatterplot of GWAS p-values vs D+ for the respective genomic window for each significant SNP
+        * Scatterplots of D+ versus the percent of sites for the window that are ABBA or BAAA to help better understand their respective contributions 
 
 
 #### Polymorphism
@@ -141,26 +142,27 @@ Polymorphism was then measured both within and between populations for genomic w
     * Inputs: 
         * window size
         * D stat pop string (e.g. sim_ssh_sech_mel)
-    * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
-    * Histograms of per-window pi for sim, sech, and ssh
-    * Histograms of per-window derived allele frequencies (mel as outgroup) for sim, sech, and ssh
-    * Histograms of per-window pairwise differences for derived allele frequencies (mel as outgroup) for sim, sech, and ssh
-    * Histograms of Dxy for all pariwise combinations of sim, sech, and ssh
-    * Histograms of Fst for all pairwise combinations of sim, sech, and ssh
-    * Per site derived allele frequency distributions for sim, sech, and ssh
-    * Traces of per-window values for several measurements to help visualize both their distribtuons across the genome and any potential correlations.
-        * Significant GWAS SNPs and their p-values for octanoic acid resistance in ssh
-        * AB site counts
-        * D+
-        * pi
-        * Dxy
-        * Fst
-        * Derived allele frequencies
-    * If sech is one of the pops, then a number of additional plots are made
-        * Scatterplot of pi sech versus D+ is plotted to see if D+ outlier windows have higher pi sech
-        * Scatterplot of BAAA-ABAA vs pi sech with points colored to reflect D+ value
-        * Scatterplot of BAAA-ABAA vs D+ with points colored and size-scaled to reflect pi sech value
-        * Scatterplot of ABBA-BABA vs D+ with points colored and size-scaled to reflect pi sech value
+    * Plots
+        * Distribution of number of polymorphic sites per window to help set useful cutoffs to remove windows with too few sites
+        * Histograms of per-window pi for sim, sech, and ssh
+        * Histograms of per-window derived allele frequencies (mel as outgroup) for sim, sech, and ssh
+        * Histograms of per-window pairwise differences for derived allele frequencies (mel as outgroup) for sim, sech, and ssh
+        * Histograms of Dxy for all pariwise combinations of sim, sech, and ssh
+        * Histograms of Fst for all pairwise combinations of sim, sech, and ssh
+        * Per site derived allele frequency distributions for sim, sech, and ssh
+        * Traces of per-window values for several measurements to help visualize both their distribtuons across the genome and any potential correlations.
+            * Significant GWAS SNPs and their p-values for octanoic acid resistance in ssh
+            * AB site counts
+            * D+
+            * pi
+            * Dxy
+            * Fst
+            * Derived allele frequencies
+        * If sech is one of the pops, then a number of additional plots are made
+            * Scatterplot of pi sech versus D+ is plotted to see if D+ outlier windows have higher pi sech
+            * Scatterplot of BAAA-ABAA vs pi sech with points colored to reflect D+ value
+            * Scatterplot of BAAA-ABAA vs D+ with points colored and size-scaled to reflect pi sech value
+            * Scatterplot of ABBA-BABA vs D+ with points colored and size-scaled to reflect pi sech value
       
 
 #### Outlier windows
@@ -182,16 +184,17 @@ Outlier windows for pi sech, D+  were identified using the 99th quantile as the 
           * prefix for zarr file path (file name minus chromosome and extension, e.g. full path minus '_2L.zarr')
           * sqlite database file path
 
-  3. outlier_wins.R generates a pdf with a page for each of the outlier windows: pi sech, D+, or random which are passed in as a parameter. Each window plot has several panels:
+  3. outlier_wins.R generates a pdf with a page for each of the outlier windows: pi sech, D+, or random which are passed in as a parameter.
       * Inputs: 
           * window size
           * outlier type (d_plus, pi_sech, random)
           * D stat pop string (e.g. sim_ssh_sech_mel)
-      * Scatterplots of dervied allele frequencies for each polymorphic site in the window. There is a separate panel for each of sim, sech, and ssh
-      * A histogram to the right of the scatterplot showing the distribution of derived allele frequencies.
-      * A separate scatterplot of derived allele frequencies for all of the sech pops (defined by Seychelles geography)
-      * Traces of histogram counts showing the distribution of derived allele frequencies for each sech pop.
-      * Additionally, transparent gray bars show the location of annotated genes in the window and vertical black lines indicate significant SNPs from the ssh octanoic acid GWAS. D+ and the genomic D+ quantile are also printed in the upper-right corner.
+      * Each window plot has several panels:
+          * Scatterplots of dervied allele frequencies for each polymorphic site in the window. There is a separate panel for each of sim, sech, and ssh
+          * A histogram to the right of the scatterplot showing the distribution of derived allele frequencies.
+          * A separate scatterplot of derived allele frequencies for all of the sech pops (defined by Seychelles geography)
+          * Traces of histogram counts showing the distribution of derived allele frequencies for each sech pop.
+          * Additionally, transparent gray bars show the location of annotated genes in the window and vertical black lines indicate significant SNPs from the ssh octanoic acid GWAS. D+ and the genomic D+ quantile are also printed in the upper-right corner.
 
   4. get_outlier_win_alleles.py records the number of derived alleles for each site for each sample for all polymorphic sites in out lier windows (pi sech, D+, or random) and stores the results in a database table
       * Inputs: 
@@ -225,10 +228,11 @@ Outlier windows for pi sech, D+  were identified using the 99th quantile as the 
       * Inputs: 
           * window size
           * D stat pop string (e.g. sim_ssh_sech_mel)
-      * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
-      * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
-      * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
-      * Histograms for each sech sample of Dxy compared against sech anro
+      * Plots
+          * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
+          * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
+          * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
+          * Histograms for each sech sample of Dxy compared against sech anro
   
   
 ## D. simulans into D. sechellia introgression
@@ -282,8 +286,9 @@ The steps below can be run on either contigs or reads using an input parameter u
           * window size
           * sample id
           * sequence type (trimmedReads or contigs)
-      * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
-      * contigs/reads with one per line. Those that map in more than one piece are colored red to draw attention to them.
+      * Plots
+          * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
+          * contigs/reads with one per line. Those that map in more than one piece are colored red to draw attention to them.
 
 
 #### Look for differentiated haplotypes in reads/contigs
@@ -308,10 +313,11 @@ Note that this analysis is still ongoing as we await additional Oxford Nanopore 
 
   5. Look at anro allele concordance for reads overlapping putative inversions, coloring reads by their amount of anro allele concordance using inversion_check_per_der_reads_inversion_plots.R. The R script creates a pdf file with one page per putative inversion containing:
       * No Inputs 
-      * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
-      * Scatterplot of the read derived allele frequency. A blue line denotes the average frequency for 2kb windows across the region.
-      * Scatterplot of the read sech anro allele frequency. A red line indicates the average frequency for 2kb windows across the region.
-      * The mapped reads plotted one per line. The reads are colored by their level of anro allele concordance with blue denoting low concordance, green indicating around 50% concordance, and red denoting high concordance. Extended regions of blue reads should indicate a haplotype diverged from sech anro.
+      * Plots
+          * Scatterplot of sech derived allele frequencies where banding of allele frequencies indicates where the putative inversions likely lie.
+          * Scatterplot of the read derived allele frequency. A blue line denotes the average frequency for 2kb windows across the region.
+          * Scatterplot of the read sech anro allele frequency. A red line indicates the average frequency for 2kb windows across the region.
+          * The mapped reads plotted one per line. The reads are colored by their level of anro allele concordance with blue denoting low concordance, green indicating around 50% concordance, and red denoting high concordance. Extended regions of blue reads should indicate a haplotype diverged from sech anro.
 
 
 
