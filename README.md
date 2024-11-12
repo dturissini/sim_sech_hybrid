@@ -194,41 +194,41 @@ Outlier windows for pi sech, D+  were identified using the 99th quantile as the 
       * Additionally, transparent gray bars show the location of annotated genes in the window and vertical black lines indicate significant SNPs from the ssh octanoic acid GWAS. D+ and the genomic D+ quantile are also printed in the upper-right corner.
 
   4. get_outlier_win_alleles.py records the number of derived alleles for each site for each sample for all polymorphic sites in out lier windows (pi sech, D+, or random) and stores the results in a database table
-    * Inputs: 
-        * window size
-        * pop to record alleles for (e.g. sech, ssh)
-        * outlier type (d_plus, pi_sech, random)
-        * D stat pop string (e.g. sim_ssh_sech_mel)
-        * prefix for zarr file path (file name minus chromosome and extension, e.g. full path minus '_2L.zarr')
-        * sqlite database file path
+      * Inputs: 
+          * window size
+          * pop to record alleles for (e.g. sech, ssh)
+          * outlier type (d_plus, pi_sech, random)
+          * D stat pop string (e.g. sim_ssh_sech_mel)
+          * prefix for zarr file path (file name minus chromosome and extension, e.g. full path minus '_2L.zarr')
+          * sqlite database file path
   
   5. make_outlier_pi_sech_win_adj_allele_dists.py seeks to see how much each sample differs from the sech anro pop in outlier windows (pi sech, D+, or random) by summing the number of alleles that differ from sech anro as a rough distance metric. It takes advantage of the extremely low polymorphism in D. sechellia, and as a bit of a shortcut compares against a single sech anro sample as a reference. sech anro was chosen as the reference since it is low polymorphism and has consistent haplotypes in outlier pi sech windows that often differ from sech denis and sech praslin pops. The distance metric is helpful for easily visualizing the divergent haplotypes seen in sech for many of the outlier D+ and pi sech windows.
-    * Inputs: 
-        * window size
-        * outlier type (d_plus, pi_sech, random)
-        * D stat pop string (e.g. sim_ssh_sech_mel)
-        * sqlite database file path
+      * Inputs: 
+          * window size
+          * outlier type (d_plus, pi_sech, random)
+          * D stat pop string (e.g. sim_ssh_sech_mel)
+          * sqlite database file path
   
   6. outlier_sech_alleles.R makes a pdf with a page for each outlier window (pi sech, D+, or random). The plots contain two panels. The top panel contains the same pi sech derived allele frequency scatterplot as in outlier_wins.R. The bottom panel shows per site alleles for each sech sample on its own line. The alleles are colored by their similarity to a reference sech anro sample with blue being homozygous anro, green bing heterozygous, and red being homozygous non-sech anro. The plots are used to visualize the unexpectedly differentiated haplotypes we found in sech samples. Colored boxes on the left of the plot show how different each sample is from sech anro for the outlier pi sech alleles using the metric calculated in make_outlier_pi_sech_win_adj_allele_dists.py as described above.
-    * Inputs: 
-        * window size
-        * outlier type (d_plus, pi_sech, random)
-        * D stat pop string (e.g. sim_ssh_sech_mel)
+      * Inputs: 
+          * window size
+          * outlier type (d_plus, pi_sech, random)
+          * D stat pop string (e.g. sim_ssh_sech_mel)
   
   7. get_sech_anro_dxy_windows.py calcualtes Dxy between each sech pop and sech anro for windows across the genome and stores the results in a database table.
-    * Inputs: 
-        * window size
-        * prefix for zarr file path (file name minus chromosome and extension, e.g. full path minus '_2L.zarr')
-        * sqlite database file path
+      * Inputs: 
+          * window size
+          * prefix for zarr file path (file name minus chromosome and extension, e.g. full path minus '_2L.zarr')
+          * sqlite database file path
   
   8. sech_anro_dxy_windows.R generates a pdf with plots showing the window sech anro Dxy results from the previous step. 
-    * Inputs: 
-        * window size
-        * D stat pop string (e.g. sim_ssh_sech_mel)
-    * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
-    * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
-    * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
-    * Histograms for each sech sample of Dxy compared against sech anro
+      * Inputs: 
+          * window size
+          * D stat pop string (e.g. sim_ssh_sech_mel)
+      * Scatterplot of sech anro Dxy (averaged over all windows) against the sech anro allele distance calculated in step 5 above. 
+      * Scatterplots similar to above but removing outlier pi sech windows above different thresholds to see if genomic patterns still persist or are driven by outlier windows.
+      * Traces of window Dxy values across each chromosome arm for each sech pop compared against sech anro
+      * Histograms for each sech sample of Dxy compared against sech anro
   
   
 ## D. simulans into D. sechellia introgression
@@ -237,10 +237,10 @@ The initial focus of the analysis was to look for introgression from D. sechelli
 Commands for running the steps described below can be found in sim_into_sech_introgression_windows_steps.txt are mostly the same as those described above for D. sechellia into D. Sinulans introgression with one additional R script:
 
   1. poly_windows_comp.R creates a pdf with one page for each chromosome arm comparing ABBA BABA counts and D+ for sim_ssh_sech_mel and sechdepr_sech_base_sim_mel.An additional panel showed avergae pi sech for each window for sech, (sech depr, sech denis, or sech pras), and sech base. Transparent grey bars show pi sech outlier windows (top 1%). These plots are helpful for seeing that outlier pi sech windows overlap with outlier D+ windows for introgression between D. sechellia and D. simulans in both directions. The R script also runs hypergeometric tests to show a significnat overlap between pi sech outliers and D+
-    * Inputs: 
-        * window_size
-        * First D stat pop string (e.g. sim_ssh_sech_mel)
-        * Second D stat pop string (e.g. sim_ssh_sech_mel)
+      * Inputs: 
+          * window_size
+          * First D stat pop string (e.g. sim_ssh_sech_mel)
+          * Second D stat pop string (e.g. sim_ssh_sech_mel)
 
 
 ## Inversion checks
