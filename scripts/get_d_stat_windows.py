@@ -33,12 +33,18 @@ def create_windows_table(conn, win_size, table_suffix, d_stats_table):
   
 
 
-#load genotyope and positions arrays
+# Define a function to load genotyope and positions arrays.
 def load_callset_pos(chrom, zarr_file):
+    # Load the vcf file.
     callset = zarr.open_group(zarr_file, mode='r')
+    # Extract the genotypes.
     geno = callset[f'{chrom}/calldata/GT']
+    # Load the positions.
     pos = allel.SortedIndex(callset[f'{chrom}/variants/POS'])
-    return geno, pos
+    # Get samples
+    samples_key = chrom + '/samples'
+    samples = callset[samples_key][...].tolist()
+    return geno, pos, samples
 
 #compute adjusted chromosome lengths
 def chr_seq_len(window_size, chr_dicc):
@@ -166,15 +172,12 @@ def main():
   
   
   #make pandas dataframe of metadata
-  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id
                             and l.pop in ('{p1}', '{p2}', '{p3}', '{p4}')""", conn)
   
-  #intialize the pop dictionary
-  idx_pop_dicc = {}
-  for pop_i in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
+  pops = list(set(meta_df['pop']))
 
   
   #intialize a dictionary of chromosome lengths
@@ -202,10 +205,16 @@ def main():
   for chrom in adj_chrom_dicc:
       #extract the genotype callset and positions
       zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-      callset, all_pos = load_callset_pos(chrom, zarr_file)
+      callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
       wind_dicc, left_right = window_info(
           all_pos, win_size, adj_chrom_dicc[chrom],
       )
+
+      # Intialize pop dictionary.
+      idx_pop_dicc = {}
+      for pop in pops:
+          # Fill the dictionary.
+          idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
 
       for wind in wind_dicc:
           left, right = left_right[wind]
@@ -266,7 +275,7 @@ def main():
         d_pluses.append(np.nan)
       else:
         zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-        callset, all_pos = load_callset_pos(chrom, zarr_file)
+        callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
         wind_loc = all_pos.locate_range(start, end)
         abba, baba, baaa, abaa = dros_site_patterns(gt=allel.GenotypeArray(callset[wind_loc]),
                                                     p1_idx=idx_pop_dicc[p1], p2_idx=idx_pop_dicc[p2],
