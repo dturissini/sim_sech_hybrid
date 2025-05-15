@@ -91,11 +91,13 @@ def calc_alt_freqs(gt):
 
 #calculate derived allele frequencies
 def calc_mean_der_freq(gt, outgroup_gt, sfs_win):
-    if (gt.count_alleles().shape[1] == 1):
+    if (gt.count_alleles().shape[1] == 0):
+        alt_freqs = np.repeat(np.array([np.nan]), gt.count_alleles().shape[0])
+    elif (gt.count_alleles().shape[1] == 1):
         alt_freqs = gt.count_alleles().to_frequencies()[:, 0] - 1
     else:
         alt_freqs = gt.count_alleles().to_frequencies()[:, 1]    
-
+    
     der_freqs = alt_freqs 
     for i, freq in enumerate(der_freqs):  
       if outgroup_gt[i,][0][0] == 1:
@@ -121,7 +123,7 @@ def calc_mean_der_freq(gt, outgroup_gt, sfs_win):
 #calculate pi
 def pixy(gt, pop_idx):
     aac = gt.take(pop_idx, axis=1).count_alleles()
-    if aac.shape[1] == 1:
+    if aac.shape[1] < 2:
         #return zero if there are no polymorphic sites
         return 0
     else:
@@ -135,6 +137,7 @@ def pixy(gt, pop_idx):
         denominator = np.nansum(nC2[~mask])
         pi_pixy = numerator / denominator
         return pi_pixy
+
 
 
 
@@ -254,7 +257,7 @@ def main():
             start = starts[idx]
             end = ends[idx]
             num_sites = tot_sites[idx]
-            
+                        
             if num_sites == 0:
               der_freqs.append(np.nan)
               pis.append(np.nan)

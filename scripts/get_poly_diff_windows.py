@@ -77,7 +77,9 @@ def window_info(positions, window_size, sequence_length):
 #calculate alternative allele frequencies
 def calc_alt_freqs(gt):
     # If there are no altenative alleles...
-    if (gt.count_alleles().shape[1] == 1):
+    if (gt.count_alleles().shape[1] == 0):
+        alt_freqs = np.repeat(np.array([np.nan]), gt.count_alleles().shape[0])
+    elif (gt.count_alleles().shape[1] == 1):
         # Calculate alternative allele frequencies.
         alt_freqs = gt.count_alleles().to_frequencies()[:, 0] - 1
     # Else...
@@ -87,10 +89,13 @@ def calc_alt_freqs(gt):
     return alt_freqs
 
 
+
 #calculate the difference for derived allele frequencies between two pops
 def calc_mean_der_freq_diff(gt_a, gt_b, outgroup_gt):
     # If there are no altenative alleles...
-    if (gt_a.count_alleles().shape[1] == 1):
+    if (gt_a.count_alleles().shape[1] == 0):
+        alt_freqs_a = np.repeat(np.array([np.nan]), gt_a.count_alleles().shape[0])
+    elif (gt_a.count_alleles().shape[1] == 1):
         # Calculate alternative allele frequencies.
         alt_freqs_a = gt_a.count_alleles().to_frequencies()[:, 0] - 1
     # Else...
@@ -104,7 +109,9 @@ def calc_mean_der_freq_diff(gt_a, gt_b, outgroup_gt):
         der_freqs_a[i] = 1 - freq    
 
     # If there are no altenative alleles...
-    if (gt_b.count_alleles().shape[1] == 1):
+    if (gt_b.count_alleles().shape[1] == 0):
+        alt_freqs_b = np.repeat(np.array([np.nan]), gt_b.count_alleles().shape[0])
+    elif (gt_b.count_alleles().shape[1] == 1):
         # Calculate alternative allele frequencies.
         alt_freqs_b = gt_b.count_alleles().to_frequencies()[:, 0] - 1
     # Else...
