@@ -34,7 +34,10 @@ def load_callset_pos(chrom, zarr_file):
     geno = callset[f'{chrom}/calldata/GT']
     # Load the positions.
     pos = allel.SortedIndex(callset[f'{chrom}/variants/POS'])
-    return geno, pos
+    # Get samples
+    samples_key = chrom + '/samples'
+    samples = callset[samples_key][...].tolist()
+    return geno, pos, samples
 
 
 
@@ -97,7 +100,7 @@ def main():
        
     # Extract the genotype callset and positions.
     zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-    callset, all_pos = load_callset_pos(chrom, zarr_file)
+    callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
       
     gwas_pos, gwas_idx, all_pos_idx = np.intersect1d(gwas_df['pos'], all_pos, assume_unique=True, return_indices=True)
     

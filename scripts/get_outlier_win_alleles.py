@@ -39,7 +39,10 @@ def load_callset_pos(chrom, zarr_file):
     geno = callset[f'{chrom}/calldata/GT']
     # Load the positions.
     pos = allel.SortedIndex(callset[f'{chrom}/variants/POS'])
-    return geno, pos
+    # Get samples
+    samples_key = chrom + '/samples'
+    samples = callset[samples_key][...].tolist()
+    return geno, pos, samples
 
 
 
@@ -65,9 +68,11 @@ def main():
   
   
   # Read in meta data as a pandas dataframe.
-  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id""", conn)
+
+  pops = list(set(meta_df['pop']))
 
   outlier_sql = f"""select win_id, chrom, start, end
                     from {d_win_table}
@@ -80,11 +85,6 @@ def main():
   outgroup = pop_str.split('_')[3]
   
   
-  # Intialize pop dictionary.
-  idx_pop_dicc = {}
-  for pop_i in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
-
   
   # Get alleles for the user provided pop for every outlier window 
   sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
@@ -99,11 +99,16 @@ def main():
        
       # Extract the genotype callset and positions.
       zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-      callset, all_pos = load_callset_pos(chrom, zarr_file)
+      callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
       # Identify the window to extract.
       wind_loc = all_pos.locate_range(start, end)
       win_gt = allel.GenotypeArray(callset[wind_loc])
       
+      # Intialize pop dictionary.
+      idx_pop_dicc = {}
+      for pop in pops + [outgroup]:
+          # Fill the dictionary.
+          idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
       
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
       outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1)
