@@ -34,7 +34,7 @@ def create_windows_table(conn, win_size, poly_diff_win_table):
 
 
 
-#define a function to load genotyope and positions arrays
+# Define a function to load genotyope and positions arrays.
 def load_callset_pos(chrom, zarr_file):
     # Load the vcf file.
     callset = zarr.open_group(zarr_file, mode='r')
@@ -42,7 +42,10 @@ def load_callset_pos(chrom, zarr_file):
     geno = callset[f'{chrom}/calldata/GT']
     # Load the positions.
     pos = allel.SortedIndex(callset[f'{chrom}/variants/POS'])
-    return geno, pos
+    # Get samples
+    samples_key = chrom + '/samples'
+    samples = callset[samples_key][...].tolist()
+    return geno, pos, samples
 
 
 #define a function to compute adjusted chromosome lengths
@@ -189,16 +192,11 @@ def main():
                ['sechbase', 'sechdepr']]
   
   #make a pandas dataframe of metadata
-  meta_df = pd.read_sql(f"""select s.sample_id, l.pop, vcf_order
+  meta_df = pd.read_sql(f"""select s.sample_id, l.pop
                             from sample_species s, sample_pop_link l
                             where s.sample_id = l.sample_id
                             and l.pop in ({pop_sql_str})""", conn)
-    
-  #intialize a pop dictionary
-  idx_pop_dicc = {}
-  for pop_i in list(set(meta_df['pop'])):
-    idx_pop_dicc[pop_i] = meta_df['vcf_order'][meta_df['pop'] == pop_i]
-  
+      
     
   #intialize a dictionary of chromosome lengths
   chrom_query = conn.execute("""select chrom, chrom_len 
@@ -217,12 +215,19 @@ def main():
   for chrom in adj_chrom_dicc:
       #get the genotype callset and positions
       zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-      callset, all_pos = load_callset_pos(chrom, zarr_file)
+      callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
       #make the window dictionaries
       wind_dicc, left_right = window_info(
           all_pos, win_size, adj_chrom_dicc[chrom],
       )
       
+      # Intialize pop dictionary.
+      idx_pop_dicc = {}
+      for pop in pops + [outgroup]:
+          # Fill the dictionary.
+          idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
+
+
       for pops in pop_comps:
         pop_a, pop_b = pops
         print(chrom, pop_a, pop_b)
@@ -300,7 +305,7 @@ def main():
             else:
               #extract the genotypes and positions
               zarr_file = zarr_prefix + '_' + chrom + '.zarr'
-              callset, all_pos = load_callset_pos(chrom, zarr_file)
+              callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
               #get the windows
               wind_loc = all_pos.locate_range(start, end)
               
