@@ -86,7 +86,7 @@ der_freq_sfs <- dbGetQuery(conn, paste("select pop, der_freq, num_sites
 chroms <- sort(unique(d_wins$chrom))
 
 #get threshold for number of called sites per window
-num_sites_cutoff <- as.numeric(win_size) / 50
+as.numeric(win_size) / 5 <- as.numeric(win_size) / 5
 
 #get threshold for AB sum per window
 ab_cutoff <- as.numeric(win_size) / 10000
@@ -95,51 +95,51 @@ ab_cutoff <- as.numeric(win_size) / 10000
 pdf(pdf_file, height=8, width=10.5)
 #hist of sites per window
 hist(d_wins$num_sites, breaks=seq(0, max(d_wins$num_sites) + 100, 100), col='black', xlab='num sites', ylab='windows', main=c('Total sites per window', paste('window size =', win_size)))
-abline(v=num_sites_cutoff, col='red')
+abline(v=as.numeric(win_size) / 5, col='red')
 
 par(mfrow=c(3,1))
 #hist of pi for all three pops
-pi_breaks = seq(min(poly_wins$pi[poly_wins$num_sites > num_sites_cutoff]), max(poly_wins$pi[poly_wins$num_sites > num_sites_cutoff]) + .001, .001)
+pi_breaks = seq(min(poly_wins$pi[poly_wins$num_sites > as.numeric(win_size) / 5]), max(poly_wins$pi[poly_wins$num_sites > as.numeric(win_size) / 5]) + .001, .001)
 for (i in 1:length(pops))
   {
-  hist(poly_wins$pi[poly_wins$num_sites > num_sites_cutoff & poly_wins$pop == pops[i]], breaks=pi_breaks, col='black', xlab='pi', ylab='windows', main=c(paste('Pi ', pops[i],  ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size))) 
+  hist(poly_wins$pi[poly_wins$num_sites > as.numeric(win_size) / 5 & poly_wins$pop == pops[i]], breaks=pi_breaks, col='black', xlab='pi', ylab='windows', main=c(paste('Pi ', pops[i],  ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size))) 
   }
 
 
 #hist of derived allele freq for all three pops
-der_freq_breaks = seq(min(poly_wins$der_freq[poly_wins$num_sites > num_sites_cutoff], na.rm = T), max(poly_wins$der_freq[poly_wins$num_sites > num_sites_cutoff], na.rm = T) + .001, .001)
+der_freq_breaks = seq(min(poly_wins$der_freq[poly_wins$num_sites > as.numeric(win_size) / 5], na.rm = T), max(poly_wins$der_freq[poly_wins$num_sites > as.numeric(win_size) / 5], na.rm = T) + .001, .001)
 for (i in 1:length(pops))
   {
-  hist(poly_wins$der_freq[poly_wins$num_sites > num_sites_cutoff & poly_wins$pop == pops[i]], breaks=der_freq_breaks, col='black', xlab='Derived allele freq', ylab='windows', main=c(paste('Derived freq ', pops[i], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
+  hist(poly_wins$der_freq[poly_wins$num_sites > as.numeric(win_size) / 5 & poly_wins$pop == pops[i]], breaks=der_freq_breaks, col='black', xlab='Derived allele freq', ylab='windows', main=c(paste('Derived freq ', pops[i], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
   }
 
 
 
 #define filters for poly_diff_wins dataframe
-poly_diff_filter <- poly_diff_wins$num_sites > num_sites_cutoff
+poly_diff_filter <- poly_diff_wins$num_sites > as.numeric(win_size) / 5
 poly_diff_filter_12 <- poly_diff_filter & poly_diff_wins$pop_a == pops[1] & poly_diff_wins$pop_b == pops[2]
 poly_diff_filter_13 <- poly_diff_filter & poly_diff_wins$pop_a == pops[1] & poly_diff_wins$pop_b == pops[3]
 poly_diff_filter_23 <- poly_diff_filter & poly_diff_wins$pop_a == pops[2] & poly_diff_wins$pop_b == pops[3]
 
 #derived allele freq diff histograms
 der_freq_diff_breaks = seq(min(poly_diff_wins$der_freq_diff[poly_diff_filter], na.rm=T), max(poly_diff_wins$der_freq_diff[poly_diff_filter], na.rm=T) + .001, .001)
-hist(poly_diff_wins$der_freq_diff[poly_diff_filter_12], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[1], ' - ', pops[2], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$der_freq_diff[poly_diff_filter_13], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[1], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$der_freq_diff[poly_diff_filter_23], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[2], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$der_freq_diff[poly_diff_filter_12], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[1], ' - ', pops[2], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$der_freq_diff[poly_diff_filter_13], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[1], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$der_freq_diff[poly_diff_filter_23], breaks=der_freq_diff_breaks, col='black', xlab='Derived allele freq diff', ylab='windows', main=c(paste('Derived freq diff: ', pops[2], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
 
 
 #dxy histograms
 dxy_breaks = seq(min(poly_diff_wins$dxy[poly_diff_filter]), max(poly_diff_wins$dxy[poly_diff_filter]) + .005, .005)
-hist(poly_diff_wins$dxy[poly_diff_filter_12], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[1], ' - ', pops[2], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$dxy[poly_diff_filter_13], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[1], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$dxy[poly_diff_filter_23], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[2], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$dxy[poly_diff_filter_12], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[1], ' - ', pops[2], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$dxy[poly_diff_filter_13], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[1], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$dxy[poly_diff_filter_23], breaks=dxy_breaks, col='black', xlab='dxy', ylab='windows', main=c(paste('Dxy ', pops[2], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
 
 
 #fst histograms
 fst_breaks = seq(min(poly_diff_wins$fst[poly_diff_filter]), max(poly_diff_wins$fst[poly_diff_filter]) + .005, .005)
-hist(poly_diff_wins$fst[poly_diff_filter_12], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[1], ' - ', pops[2], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$fst[poly_diff_filter_13], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[1], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
-hist(poly_diff_wins$fst[poly_diff_filter_23], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[2], ' - ', pops[3], ' for windows with > ', num_sites_cutoff, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$fst[poly_diff_filter_12], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[1], ' - ', pops[2], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$fst[poly_diff_filter_13], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[1], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
+hist(poly_diff_wins$fst[poly_diff_filter_23], breaks=fst_breaks, col='black', xlab='Fst', ylab='windows', main=c(paste('Fst ', pops[2], ' - ', pops[3], ' for windows with > ', as.numeric(win_size) / 5, ' sites', sep=''), paste('window size =', win_size)))
 par(mfrow=c(1,1))
 
 
@@ -164,7 +164,7 @@ for (chrom in chroms)
 
   #AB site counts
   par(mar=c(0, 4.1, 0, 2.1))
-  win_filter <- d_wins$chrom == chrom & d_wins$num_sites > num_sites_cutoff
+  win_filter <- d_wins$chrom == chrom & d_wins$num_sites > as.numeric(win_size) / 5
   
   ab_range <- range(c(d_wins$abba[win_filter],  d_wins$baba[win_filter], d_wins$baaa[win_filter], d_wins$abaa[win_filter]))
   plot((d_wins$start[win_filter] + d_wins$end[win_filter]) / 2, d_wins$abba[win_filter], col='darkblue', type='l', ylim=ab_range, xlim=xlim_range, xlab='', xaxt='n', ylab='AB site patterns', main='')
@@ -176,14 +176,14 @@ for (chrom in chroms)
 
 
   #D+
-  win_filter_d_plus <- d_wins$chrom == chrom & d_wins$num_sites > num_sites_cutoff & d_wins$ab > ab_cutoff
-  plot((d_wins$start[win_filter_d_plus] + d_wins$end[win_filter_d_plus]) / 2, d_wins$d_plus[win_filter_d_plus], type='l', ylim=c(min(d_wins$d_plus[d_wins$num_sites > num_sites_cutoff  & d_wins$ab > ab_cutoff]), max(d_wins$d_plus[d_wins$num_sites > num_sites_cutoff & d_wins$ab > ab_cutoff])), xlim=xlim_range, xlab='', xaxt='n', ylab='D+', main='')
+  win_filter_d_plus <- d_wins$chrom == chrom & d_wins$num_sites > as.numeric(win_size) / 5 & d_wins$ab > ab_cutoff
+  plot((d_wins$start[win_filter_d_plus] + d_wins$end[win_filter_d_plus]) / 2, d_wins$d_plus[win_filter_d_plus], type='l', ylim=c(min(d_wins$d_plus[d_wins$num_sites > as.numeric(win_size) / 5  & d_wins$ab > ab_cutoff]), max(d_wins$d_plus[d_wins$num_sites > as.numeric(win_size) / 5 & d_wins$ab > ab_cutoff])), xlim=xlim_range, xlab='', xaxt='n', ylab='D+', main='')
   abline(h=0, col='grey')
   rect(gwas_pos$start[gwas_pos$chrom == chrom], rep(-99, sum(gwas_pos$chrom == chrom)), gwas_pos$end[gwas_pos$chrom == chrom], rep(99, sum(gwas_pos$chrom == chrom)), col=adjustcolor('gray', .2), border=NA)
-  abline(h=quantile(d_wins$d_plus[d_wins$num_sites > num_sites_cutoff], .99), col=adjustcolor('red', .2))
+  abline(h=quantile(d_wins$d_plus[d_wins$num_sites > as.numeric(win_size) / 5], .99), col=adjustcolor('red', .2))
 
   #define filters for poly_wins dataframe
-  win_poly_filter <- poly_wins$chrom == chrom & poly_wins$num_sites > num_sites_cutoff
+  win_poly_filter <- poly_wins$chrom == chrom & poly_wins$num_sites > as.numeric(win_size) / 5
   win_poly_filter_1 <- win_poly_filter & poly_wins$pop == pops[1]
   win_poly_filter_2 <- win_poly_filter & poly_wins$pop == pops[2]
   win_poly_filter_3 <- win_poly_filter & poly_wins$pop == pops[3]
@@ -198,7 +198,7 @@ for (chrom in chroms)
 
 
   #define filters for poly_diff_wins dataframe
-  win_poly_diff_filter <- poly_diff_wins$num_sites > num_sites_cutoff & poly_diff_wins$chrom == chrom
+  win_poly_diff_filter <- poly_diff_wins$num_sites > as.numeric(win_size) / 5 & poly_diff_wins$chrom == chrom
   win_poly_diff_filter_12 <- win_poly_diff_filter & poly_diff_wins$pop_a == pops[1] & poly_diff_wins$pop_b == pops[2]
   win_poly_diff_filter_13 <- win_poly_diff_filter & poly_diff_wins$pop_a == pops[1] & poly_diff_wins$pop_b == pops[3]
   win_poly_diff_filter_23 <- win_poly_diff_filter & poly_diff_wins$pop_a == pops[2] & poly_diff_wins$pop_b == pops[3]
@@ -234,8 +234,8 @@ par(mfrow=c(1,1), mar=c(5.1, 4.1, 4.1, 2.1))
 #pi sech specific plots to help better understand how pi sech relates to introgression stats between sim and sech
 if ('sech' %in% pops)
   {
-  win_filter_d_plus <- d_wins$num_sites > num_sites_cutoff
-  poly_filter <- poly_wins$num_sites > num_sites_cutoff
+  win_filter_d_plus <- d_wins$num_sites > as.numeric(win_size) / 5
+  poly_filter <- poly_wins$num_sites > as.numeric(win_size) / 5
   
   #scatter plot of pi sech vs D+ (each point is a window)
   plot(poly_wins$pi[poly_filter & poly_wins$pop == 'sech'], d_wins$d_plus[win_filter_d_plus], pch=20, col=adjustcolor('gray', .6), xlab='pi sech', ylab='D+', main='pi sech vs D+')

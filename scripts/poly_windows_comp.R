@@ -34,7 +34,7 @@ d_stats_table_b <- paste('d_stat_win_', win_size, '_', table_suffix_b, sep='')
 poly_table <- paste('poly_win_', win_size, sep='')
 
 #set threshold for number of called sites per window
-num_sites_cutoff <- as.numeric(win_size) / 50
+as.numeric(win_size) / 5 <- as.numeric(win_size) / 50
 
 #set threshold for sum of AB sites per window
 ab_cutoff <- as.numeric(win_size) / 10000
@@ -43,18 +43,18 @@ ab_cutoff <- as.numeric(win_size) / 10000
 d_wins_a <- dbGetQuery(conn, paste("select *, abba + baba + baaa + abaa ab
                                       from ", d_stats_table_a, "
                                       where d_plus is not null
-                                      and num_sites > ", num_sites_cutoff, sep=''))
+                                      and num_sites > ", as.numeric(win_size) / 5, sep=''))
 
 d_wins_b <- dbGetQuery(conn, paste("select *, abba + baba + baaa + abaa ab
                                       from ", d_stats_table_b, "
                                       where d_plus is not null
-                                      and num_sites > ", num_sites_cutoff, sep=''))
+                                      and num_sites > ", as.numeric(win_size) / 5, sep=''))
 
 
 poly_wins <- dbGetQuery(conn, paste("select * 
                                      from ", poly_table, "
                                      where pop in (", pop_str, ")
-                                     and num_sites > ", num_sites_cutoff, sep=''))
+                                     and num_sites > ", as.numeric(win_size) / 5, sep=''))
 
 #get pop and plotting colors
 pop_cols <- dbGetQuery(conn, paste("select pop, col

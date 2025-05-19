@@ -122,7 +122,7 @@ sech_ssh_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
 chroms <- sort(unique(dxy_wins$chrom))
 
 #set threshold of number of called sites per window
-num_sites_cutoff <- as.numeric(win_size) / 50
+as.numeric(win_size) / 5 <- as.numeric(win_size) / 50
 
 #identify pi_sech 99% qunatile to identify outlier windows
 pi_sech_threshold <- quantile(poly_wins$pi, .99, na.rm=T)
@@ -147,11 +147,11 @@ for (chrom in chroms)
   xlim_range <- c(0, max(poly_wins$end[poly_wins$chrom == chrom]))  
   
   par(mfrow=c(8,1), mar=c(0, 4.1, 4.1, 2.1))
-  win_filter <- poly_wins$chrom == chrom & poly_wins$num_sites > num_sites_cutoff
+  win_filter <- poly_wins$chrom == chrom & poly_wins$num_sites > as.numeric(win_size) / 5
   plot((poly_wins$start[win_filter] + poly_wins$end[win_filter]) / 2, poly_wins$pi[win_filter], xlim=xlim_range, type='l', col='red', xlab='', xaxt='n', ylab='Pi', main=chrom)
 
 
-  y_max <- max(dxy_wins$dxy_sech_anro[dxy_wins$chrom == chrom  & dxy_wins$num_sites > num_sites_cutoff])  
+  y_max <- max(dxy_wins$dxy_sech_anro[dxy_wins$chrom == chrom  & dxy_wins$num_sites > as.numeric(win_size) / 5])  
   par(mar=c(0, 4.1, 0, 2.1))
   for (i in which(!(sech_ssh_pops$pop %in% pop_exclude)))
     {
@@ -162,7 +162,7 @@ for (chrom in chroms)
     text(1000000, .9* y_max, sech_ssh_pops$short_desc[i])
     for (sample_id in samples$sample_id[samples$pop == sech_ssh_pops$pop[i]])
       {
-      sample_win_filter <- dxy_wins$chrom == chrom & dxy_wins$num_sites > num_sites_cutoff & dxy_wins$sample_id == sample_id
+      sample_win_filter <- dxy_wins$chrom == chrom & dxy_wins$num_sites > as.numeric(win_size) / 5 & dxy_wins$sample_id == sample_id
     
       points((dxy_wins$start[sample_win_filter] + dxy_wins$end[sample_win_filter]) / 2, dxy_wins$dxy_sech_anro[sample_win_filter], type='l', col=dxy_wins$col[sample_win_filter])
       if (i == nrow(sech_ssh_pops))
