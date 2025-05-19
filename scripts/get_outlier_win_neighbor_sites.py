@@ -49,7 +49,9 @@ def load_callset_pos(chrom, zarr_file):
 def get_der_allele_counts(gt, outgroup_gt):
     total_alleles = gt.count_alleles().sum(axis=1)
     # If there are no altenative alleles...
-    if (gt.count_alleles().shape[1] == 1):
+    if (gt.count_alleles().shape[1] == 0):
+        alt_freqs = np.repeat(np.array([np.nan]), gt.count_alleles().shape[0])
+    elif (gt.count_alleles().shape[1] == 1):
         # Calculate alternative allele frequencies.
         alt_alleles = gt.count_alleles()[:, 0] - 1
     else:
@@ -93,13 +95,13 @@ def main():
     pi_pop = outlier_type.split('_')[1]
     pi = pd.read_sql(f"""select pi
                          from {poly_win_table}
-                         where num_sites > 1000
+                         where num_sites > 10000
                          and pop = '{pi_pop}'""", conn)
       
     pi_quantile = np.quantile(pi['pi'], .99)
     win_sql = f"""select p2.win_id, p2.chrom, p2.start, p2.end
                  from {poly_win_table} p, {poly_win_table} p2
-                 where p.num_sites > 1000
+                 where p.num_sites > 10000
                  and p.pi > {pi_quantile}
                  and p.pop = '{pi_pop}'
                  and p2.chrom = p.chrom

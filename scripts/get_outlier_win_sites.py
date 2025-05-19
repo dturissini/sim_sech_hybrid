@@ -65,7 +65,9 @@ def load_callset_pos(chrom, zarr_file):
 def get_der_allele_counts(gt, outgroup_gt):
     total_alleles = gt.count_alleles().sum(axis=1)
     # If there are no altenative alleles...
-    if (gt.count_alleles().shape[1] == 1):
+    if (gt.count_alleles().shape[1] == 0):
+        alt_freqs = np.repeat(np.array([np.nan]), gt.count_alleles().shape[0])
+    elif (gt.count_alleles().shape[1] == 1):
         # Calculate alternative allele frequencies.
         alt_alleles = gt.count_alleles()[:, 0] - 1
     else:
@@ -109,30 +111,32 @@ def main():
   if outlier_type == 'd_plus':
     d_plus = pd.read_sql(f"""select d_plus
                              from {d_win_table}
-                             where num_sites > 1000""", conn)
+                             where num_sites > 10000
+                             and d_plus is not null""", conn)
       
     d_plus_quantiles = np.quantile(d_plus['d_plus'], [.001, .99])
     win_sql = f"""select win_id, chrom, start, end
                   from {d_win_table}
-                  where num_sites > 1000
+                  where num_sites > 10000
                   and (d_plus > {d_plus_quantiles[1]} or d_plus < {d_plus_quantiles[0]})"""
+                  
   elif outlier_type[:2] == 'pi':
     pi_pop = outlier_type.split('_')[1]
     pi = pd.read_sql(f"""select pi
                          from {poly_win_table}
-                         where num_sites > 1000
+                         where num_sites > 10000
                          and pop = '{pi_pop}'""", conn)
       
     pi_quantile = np.quantile(pi['pi'], .99)
     win_sql = f"""select win_id, chrom, start, end
                  from {poly_win_table}
-                 where num_sites > 1000
+                 where num_sites > 10000
                  and pi > {pi_quantile}
                  and pop = '{pi_pop}'"""
   elif outlier_type == 'random':
     win_sql = f"""select win_id, chrom, start, end
                   from {d_win_table}
-                  where num_sites > 1000
+                  where num_sites > 10000
                   order by random() limit 50"""
 
   #populate the pandas dataframe from sqlite
