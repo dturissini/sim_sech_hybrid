@@ -122,7 +122,7 @@ sech_ssh_pops <- dbGetQuery(conn, paste("select pop, short_desc, col
 chroms <- sort(unique(dxy_wins$chrom))
 
 #set threshold of number of called sites per window
-as.numeric(win_size) / 5 <- as.numeric(win_size) / 50
+num_sites_cutoff <- as.numeric(win_size) / 50
 
 #identify pi_sech 99% qunatile to identify outlier windows
 pi_sech_threshold <- quantile(poly_wins$pi, .99, na.rm=T)

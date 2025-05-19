@@ -26,7 +26,7 @@ wins <- dbGetQuery(conn, paste("select *
 chroms <- sort(unique(wins$chrom))
 
 #set threhsold for number of called sites per window
-as.numeric(win_size) / 5 <- as.numeric(win_size) / 50
+num_sites_cutoff <- as.numeric(win_size) / 50
 
 
 pdf(pdf_file, height=8, width=10.5)

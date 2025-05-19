@@ -86,7 +86,7 @@ der_freq_sfs <- dbGetQuery(conn, paste("select pop, der_freq, num_sites
 chroms <- sort(unique(d_wins$chrom))
 
 #get threshold for number of called sites per window
-as.numeric(win_size) / 5 <- as.numeric(win_size) / 5
+num_sites_cutoff <- as.numeric(win_size) / 5
 
 #get threshold for AB sum per window
 ab_cutoff <- as.numeric(win_size) / 10000

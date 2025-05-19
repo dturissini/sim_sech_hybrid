@@ -34,7 +34,7 @@ d_stats_table_b <- paste('d_stat_win_', win_size, '_', table_suffix_b, sep='')
 poly_table <- paste('poly_win_', win_size, sep='')
 
 #set threshold for number of called sites per window
-as.numeric(win_size) / 5 <- as.numeric(win_size) / 50
+num_sites_cutoff <- as.numeric(win_size) / 50
 
 #set threshold for sum of AB sites per window
 ab_cutoff <- as.numeric(win_size) / 10000
