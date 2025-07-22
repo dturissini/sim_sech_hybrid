@@ -32,20 +32,12 @@ def main():
   vcf_file_out_multi = vcf_file_out[:-7] + '_multi.vcf.gz'
   vcf_file_out_no_mel = vcf_file_out[:-7] + '_no_mel.vcf.gz'
 
-  min_depth = 6
-  lk_chrom = {'NC_052520.2': '2L',
-              'NC_052521.2': '2R',
-              'NC_052522.2': '3L',
-              'NC_052523.2': '3R',
-              'NC_052525.2': 'X',
-              'NC_052524.2': '4'}
-  
-  chrom_plink_rename = {'NC_052520.2': '1',
-                        'NC_052521.2': '2',
-                        'NC_052522.2': '3',
-                        'NC_052523.2': '4',
-                        'NC_052525.2': '5',
-                        'NC_052524.2': '6'}
+  chrom_plink_rename = {'2L': '1',
+                        '2R': '2',
+                        '3L': '3',
+                        '3R': '4',
+                        'X': '5',
+                        '4': '6'}
   
  
   outgroup_syn_chroms = {}
@@ -85,8 +77,8 @@ def main():
                 onm.write(f"{header}")     
               else:
                 values = line.split('\t')       
-                if values[0] in lk_chrom:   
-                  sim_chrom = lk_chrom[values[0]]
+                if values[0] in chrom_plink_rename:   
+                  sim_chrom = values[0]
                   plink_chrom = chrom_plink_rename[values[0]]
                   mel_allele = outgroup_syn_chroms[sim_chrom][(int(values[1]) - 1):int(values[1])]
                   if mel_allele not in ['N', '-']:
