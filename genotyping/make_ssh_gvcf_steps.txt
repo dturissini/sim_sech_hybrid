@@ -1,0 +1,167 @@
+cd /work/users/d/t/dturissi/drosophila/ssh
+
+
+
+#######################
+prep ref genome and files
+#######################
+
+mkdir genotyping
+cd genotyping
+
+python3 check_bams.py
+#only D_MELANOGASTER mel was missing as expected
+
+
+#index ref genome
+mkdir ref_genome
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping/ref_genome
+
+ml bwa-mem2/2.2.1
+ml samtools/1.21
+ml gatk/4.6.1.0
+
+fasta_file='/work/users/d/t/dturissi/drosophila/ssh/genotyping/ref_genome/GCF_016746395.2_Prin_Dsim_3.1_genomic.fna'
+
+bwa-mem2 index ${fasta_file}
+samtools faidx ${fasta_file}
+gatk CreateSequenceDictionary -R ${fasta_file}
+
+
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping
+python3 make_chrom_intervals.py 
+
+
+
+
+
+#######################
+#identify fastq files
+#######################
+python3 identify_and_link_existing_fastq_files.py
+
+python3 make_download_sra_scripts.py
+
+sbatch sra/ssh_srrs_fasterq.sbatch
+
+
+'ERR1980726', 'ERR1980736', 'ERR1980746', 'SRR520334'
+
+insert into ssh_fastqs select * from ssh_fastqs_old where sample_id in ('ERR1980726', 'ERR1980736', 'ERR1980746', 'SRR520334');
+
+
+
+#######################
+#make bam files
+#######################
+mkdir -p /work/users/d/t/dturissi/drosophila/ssh/genotyping/mapping
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping/mapping
+
+
+python3 make_map_reads_scripts.py
+
+sbatch --partition=general --exclude=c[0302,0306-0311,0313,0401,0403,0410-0411,130402] --exclude=c[0301,0303-0305,0312,0314-0317,0402,0404-0409,0412-0413,130403-130407,130601-130604,151401-151418,151602-151613] map_ssh_reads.sbatch
+sacct -j 6498418
+
+
+
+sbatch --partition=general --array=80,81,82,239 --exclude=c[0302,0306-0311,0313,0401,0403,0410-0411,130402] --exclude=c[0301,0303-0305,0312,0314-0317,0402,0404-0409,0412-0413,130403-130407,130601-130604,151401-151418,151602-151613] map_ssh_reads.sbatch
+sacct -j 6539062
+
+sbatch --partition=general --array=254 --exclude=c[0302,0306-0311,0313,0401,0403,0410-0411,130402] --exclude=c[0301,0303-0305,0312,0314-0317,0402,0404-0409,0412-0413,130403-130407,130601-130604,151401-151418,151602-151613] map_ssh_reads.sbatch
+sacct -j 6541074
+
+80 ERR1980726
+81 ERR1980736
+82 ERR1980746
+239 SRR520334
+240 SRR520350
+
+SRR520350
+
+#Note that job 240 failed because SRR520350 is a duplicate of w501_SRR520350
+#SRR520350 was deleted from ssh_fastqs ex post facto, and the corresponding directory was deleted from the fastqs directory
+
+#######################
+#make gvcfs
+#######################
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping
+python3 make_raw_gvcf_scripts.py
+
+sbatch make_gvcfs.sbatch
+sacct -j 6552056
+
+
+
+#######################
+#make vcf
+#######################
+
+python3 make_vcf_scripts.py
+
+sbatch make_gatk_dbs.sbatch
+sacct -j 7628714
+ 
+sbatch make_vcfs.sbatch
+sacct -j 8414813
+
+
+
+#######################
+#filter vcfs and split by and rename chromosomes
+#######################
+python3 make_filtered_vcf_script.py
+
+sbatch make_filtered_vcf.sbatch
+sacct -j 8958106
+
+
+python3 make_filtered_vcf_by_chrom_script.py
+sbatch filtered_vcf_by_chrom.sbatch
+
+sacct -j 9134473
+
+
+#-i  'MIN(FMT/DP)>6 & MIN(FMT/GQ)>15'
+
+#######################
+#add mel to vcfs
+#######################
+python3 make_add_mel_to_chrom_vcfs_script.py
+sbatch add_mel_to_chrom_vcfs.sbatch
+
+sacct -j 9154077
+
+
+#make plink files
+ml samtools/1.21 
+ml plink/2.00  
+
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping/filtered_vcfs
+
+chroms=("2L" "2R" "3L" "3R" "X")
+
+
+rm -f ssh_plink_chrom_file_list.txt
+for chrom in "${chroms[@]}"; do
+  plink2 --vcf sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_${chrom}_plink.vcf.gz --make-bed --maf 0.05 --geno --allow-extra-chr --const-fid --out sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_${chrom}
+  echo "sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_${chrom}.bed sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_${chrom}.bim sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_${chrom}.fam" >> ssh_plink_chrom_file_list.txt
+done
+
+plink2 --pmerge-list ssh_plink_chrom_file_list.txt --make-bed --out sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup
+
+
+
+#######################
+#convert chromosome/scaffold vcfs to zarrs
+#######################
+cd /work/users/d/t/dturissi/drosophila/ssh/genotyping
+
+python3 make_chrom_vcf_to_zarr_script.py
+sbatch chrom_biallelic_snp_vcf_to_zarr.sbatch
+
+sacct -j 9269237
+
+
+
+
