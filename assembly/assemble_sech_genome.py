@@ -32,7 +32,7 @@ def main():
                                           -d {assembly_dir} \
                                           genomeSize=130m \
                                           -nanopore {fastq_file} \
-                                          -gridOptions="--time=144:00:00 --mem-per-cpu=4g --partition=general" """)
+                                          -gridOptions="--time=144:00:00 --mem-per-cpu=8g --partition=general" """)
 
 
 if __name__ == '__main__':
