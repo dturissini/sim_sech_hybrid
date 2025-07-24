@@ -1,7 +1,13 @@
+ml plink/2.00a 
+
 cd /work/users/d/t/dturissi/drosophila/ssh/introgression/pca
+
+
+
 
 #pca of all samples
 plink2 -bfile /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel --pca --out sim_sech_outgroup_mel_pca
+plink2 -bfile /work/users/d/t/dturissi/drosophila/ssh/genotyping/filtered_vcfs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup --pca --out sim_sech_outgroup_mel_all_sites_pca
 
 
 #pca of sech
@@ -11,6 +17,7 @@ sqlite3 -cmd ".mode tabs" /work/users/d/t/dturissi/drosophila/ssh/introgression/
         where pop in ('sech')" > sech_pca_ids.txt
 
 plink2 -bfile /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel --pca --out sech_pca --keep sech_pca_ids.txt
+plink2 -bfile /work/users/d/t/dturissi/drosophila/ssh/genotyping/filtered_vcfs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup --freq --pca --out sech_all_sites_pca --keep sech_pca_ids.txt
 
 
 
@@ -39,3 +46,6 @@ plink2 -bfile /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_out
 
 #make pca plots 
 Rscript ssh_mel_out_pca.R 
+
+#make pca plots 
+Rscript ssh_mel_out_all_sites_pca.R 
