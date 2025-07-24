@@ -1,3 +1,6 @@
+#to-do try mapping raw fastq with minimap
+
+
 #contains steps for looking for putative inversions in D. sechellia lines using Oxford Nanopore sequencing.
 
 cd /work/users/d/t/dturissi/drosophila/ssh/assembly/inversion_check
@@ -10,6 +13,11 @@ sbatch inversion_check_minimap.sbatch sech_Anro_114_female contigs
 sbatch inversion_check_minimap.sbatch sech_Denis_NF69 contigs
 
 
+sbatch inversion_check_minimap.sbatch SECH_20-sech_PNF5_GTGGCC_L001 contigs
+sbatch inversion_check_minimap.sbatch DenisNF134 contigs
+sbatch inversion_check_minimap.sbatch SECH_21-sech_PNF3_GTTTCG_L001 contigs
+
+
 
 #run minimap to map reads (trimmed by canu)
 sbatch inversion_check_minimap.sbatch sech_Denis_NF22 trimmedReads
@@ -17,6 +25,10 @@ sbatch inversion_check_minimap.sbatch sech_Denis_NF49 trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Denis_NF712 trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Anro_114_female trimmedReads
 sbatch inversion_check_minimap.sbatch sech_Denis_NF69 trimmedReads
+
+sbatch inversion_check_minimap.sbatch SECH_20-sech_PNF5_GTGGCC_L001 trimmedReads
+sbatch inversion_check_minimap.sbatch DenisNF134 trimmedReads
+sbatch inversion_check_minimap.sbatch SECH_21-sech_PNF3_GTTTCG_L001 trimmedReads
 
 
 
@@ -27,6 +39,9 @@ python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF712 contigs
 python3 find_inversion_overlaps_in_minimap_results.py sech_Anro_114_female contigs
 python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF69 contigs
 
+python3 find_inversion_overlaps_in_minimap_results.py SECH_20-sech_PNF5_GTGGCC_L001 contigs
+python3 find_inversion_overlaps_in_minimap_results.py DenisNF134 contigs
+python3 find_inversion_overlaps_in_minimap_results.py SECH_21-sech_PNF3_GTTTCG_L001 contigs
 
 
 #identify reads that overlap with putative inversions
@@ -35,6 +50,10 @@ python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF49 trimmedRea
 python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF712 trimmedReads
 python3 find_inversion_overlaps_in_minimap_results.py sech_Anro_114_female trimmedReads
 python3 find_inversion_overlaps_in_minimap_results.py sech_Denis_NF69 trimmedReads
+
+python3 find_inversion_overlaps_in_minimap_results.py SECH_20-sech_PNF5_GTGGCC_L001 trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py DenisNF134 trimmedReads
+python3 find_inversion_overlaps_in_minimap_results.py SECH_21-sech_PNF3_GTTTCG_L001 trimmedReads
 
 
 #store inversion overlaps in db table
@@ -49,6 +68,10 @@ Rscript inversion_check_contig_map.R 50000 sech_Denis_NF712 contigs
 Rscript inversion_check_contig_map.R 50000 sech_Anro_114_female contigs
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF69 contigs
 
+Rscript inversion_check_contig_map.R 50000 SECH_20-sech_PNF5_GTGGCC_L001 contigs
+Rscript inversion_check_contig_map.R 50000 DenisNF134 contigs
+Rscript inversion_check_contig_map.R 50000 SECH_21-sech_PNF3_GTTTCG_L001 contigs
+
 
 #plot reads that overlap with putative inversions based on minimap
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF22 trimmedReads
@@ -57,6 +80,9 @@ Rscript inversion_check_contig_map.R 50000 sech_Denis_NF712 trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Anro_114_female trimmedReads
 Rscript inversion_check_contig_map.R 50000 sech_Denis_NF69 trimmedReads
 
+Rscript inversion_check_contig_map.R 50000 SECH_20-sech_PNF5_GTGGCC_L001 trimmedReads
+Rscript inversion_check_contig_map.R 50000 DenisNF134 trimmedReads
+Rscript inversion_check_contig_map.R 50000 SECH_21-sech_PNF3_GTTTCG_L001 trimmedReads
 
 
 
@@ -66,6 +92,10 @@ sbatch inversion_check_lastz.sbatch sech_Denis_NF49
 sbatch inversion_check_lastz.sbatch sech_Denis_NF712
 sbatch inversion_check_lastz.sbatch sech_Anro_114_female
 sbatch inversion_check_lastz.sbatch sech_Denis_NF69
+
+sbatch inversion_check_lastz.sbatch SECH_20-sech_PNF5_GTGGCC_L001
+sbatch inversion_check_lastz.sbatch DenisNF134
+sbatch inversion_check_lastz.sbatch SECH_21-sech_PNF3_GTTTCG_L001
 
 
 
