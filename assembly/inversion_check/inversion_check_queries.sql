@@ -1,0 +1,120 @@
+#query to get anro allele concordance for each read overlapping putative inversions
+sqlite3 inversion_check_per_der.db
+.headers on
+select sample_id, sum(num_der_sites) total_der_sites, sum(num_anc_sites) total_anc_sites, sum(num_anro_b3_alleles) total_anro_sites from inversion_check_per_der_reads group by sample_id;
+sample_id|total_der_sites|total_anc_sites|total_anro_sites
+sech_Anro_114_female|172140|245720|408402
+sech_Denis_NF69|4591|420715|240508
+
+
+select sample_id, inv_name, read_name, total_sites, 1.0 *num_anro_b3_alleles / total_sites prop_sech_anro_alleles
+from inversion_check_per_der_reads
+where total_sites > 0 order by prop_sech_anro_alleles, read_name;
+
+
+
+#per contig anro allele concordance, helpful for identifying samples that may have non-anro haplotypes
+sqlite3 inversion_check_per_der.db
+.headers on
+select sample_id, inv_name, contig_name, 1.0 *num_anro_b3_alleles / total_sites prop_sech_anro_alleles
+from inversion_check_per_der 
+where total_sites > 0 order by sample_id, inv_name;
+
+sample_id|inv_name|contig_name|prop_sech_anro_alleles
+sech_Anro_114_female|2L_17M|tig00000247|0.995283018867924
+sech_Anro_114_female|2L_18M|tig00000247|0.988997555012225
+sech_Anro_114_female|2L_19M|tig00000247|0.997762863534676
+sech_Anro_114_female|2R_10M|tig00000007|0.99680170575693
+sech_Anro_114_female|2R_16M|tig00000007|1.0
+sech_Anro_114_female|2R_7M|tig00000007|0.992957746478873
+sech_Anro_114_female|3L_21M|tig00000236|0.997503744383425
+sech_Anro_114_female|3L_22M|tig00000236|0.964539007092199
+sech_Anro_114_female|3L_4M|tig00000236|0.944992947813822
+sech_Anro_114_female|3R_28M|tig00000230|0.997159090909091
+sech_Anro_114_female|3R_2M|tig00000230|0.236503856041131
+sech_Anro_114_female|3R_2M|tig00000243|0.145
+sech_Anro_114_female|3R_2M|tig00000244|0.147727272727273
+sech_Anro_114_female|3R_2M|tig00000419|0.141975308641975
+sech_Anro_114_female|3R_5M|tig00000230|0.994464944649446
+sech_Anro_114_female|3R_9M|tig00000230|0.984453360080241
+
+sech_Denis_NF22|2L_17M|tig00000222|0.995283018867924
+sech_Denis_NF22|2L_18M|tig00000222|0.988997555012225
+sech_Denis_NF22|2L_19M|tig00000222|0.997762863534676
+sech_Denis_NF22|2R_10M|tig00000232|0.996805111821086
+sech_Denis_NF22|2R_16M|tig00000028|1.0
+sech_Denis_NF22|2R_7M|tig00000232|0.992957746478873
+sech_Denis_NF22|3L_21M|tig00000229|0.99750499001996
+sech_Denis_NF22|3L_22M|tig00000229|0.964539007092199
+sech_Denis_NF22|3L_4M|tig00000229|0.944992947813822
+sech_Denis_NF22|3R_28M|tig00000237|0.997159090909091
+sech_Denis_NF22|3R_2M|tig00000040|0.140845070422535
+sech_Denis_NF22|3R_2M|tig00000237|0.236503856041131
+sech_Denis_NF22|3R_2M|tig00000277|0.145
+sech_Denis_NF22|3R_5M|tig00000237|0.994464944649446
+sech_Denis_NF22|3R_9M|tig00000237|0.984461152882205
+
+sech_Denis_NF49|2L_17M|tig00000251|0.995283018867924
+sech_Denis_NF49|2L_18M|tig00000139|0.988535031847134
+sech_Denis_NF49|2L_18M|tig00000251|1.0
+sech_Denis_NF49|2L_19M|tig00000196|0.997762863534676
+sech_Denis_NF49|2R_10M|tig00000542|0.995735607675906
+sech_Denis_NF49|2R_16M|tig00000087|1.0
+sech_Denis_NF49|2R_16M|tig00000615|1.0
+sech_Denis_NF49|2R_16M|tig00000616|1.0
+sech_Denis_NF49|2R_7M|tig00000151|0.992957746478873
+sech_Denis_NF49|3L_21M|tig00000098|0.99800099950025
+sech_Denis_NF49|3L_22M|tig00000188|0.964539007092199
+sech_Denis_NF49|3L_4M|tig00000068|0.956011730205279
+sech_Denis_NF49|3R_28M|tig00000063|0.997159090909091
+sech_Denis_NF49|3R_2M|tig00000035|0.236503856041131
+sech_Denis_NF49|3R_2M|tig00000547|0.141414141414141
+sech_Denis_NF49|3R_5M|tig00000029|0.994464944649446
+sech_Denis_NF49|3R_9M|tig00000130|0.977294228949858
+sech_Denis_NF49|3R_9M|tig00000240|0.991256830601093
+
+sech_Denis_NF69|2L_17M|tig00000293|0.649484536082474
+sech_Denis_NF69|2L_18M|tig00000293|0.430517711171662
+sech_Denis_NF69|2L_19M|tig00000293|0.588888888888889
+sech_Denis_NF69|2R_10M|tig00000283|0.658866995073892
+sech_Denis_NF69|2R_16M|tig00000052|0.637002341920375
+sech_Denis_NF69|2R_7M|tig00000282|0.584856396866841
+sech_Denis_NF69|3L_21M|tig00000292|0.681168057210965
+sech_Denis_NF69|3L_22M|tig00000292|0.575520833333333
+sech_Denis_NF69|3L_4M|tig00000043|0.590524534686971
+sech_Denis_NF69|3R_28M|tig00000247|0.610320284697509
+sech_Denis_NF69|3R_2M|tig00000246|0.162534435261708
+sech_Denis_NF69|3R_5M|tig00000247|0.601577909270217
+sech_Denis_NF69|3R_9M|tig00000246|0.658129175946548
+
+sech_Denis_NF69|2L_17M|tig00000293|0.632892804698972
+sech_Denis_NF69|2L_18M|tig00000293|0.433242506811989
+sech_Denis_NF69|2L_19M|tig00000293|0.608641975308642
+sech_Denis_NF69|2R_10M|tig00000283|0.643146796431468
+sech_Denis_NF69|2R_16M|tig00000052|0.62063227953411
+sech_Denis_NF69|2R_7M|tig00000282|0.570613409415121
+sech_Denis_NF69|3L_21M|tig00000292|0.668764302059497
+sech_Denis_NF69|3L_22M|tig00000292|0.516157989228007
+sech_Denis_NF69|3L_4M|tig00000043|0.577092511013216
+sech_Denis_NF69|3R_28M|tig00000247|0.571428571428571
+sech_Denis_NF69|3R_2M|tig00000246|0.804347826086957
+sech_Denis_NF69|3R_5M|tig00000247|0.549240568348849
+sech_Denis_NF69|3R_9M|tig00000246|0.633399602385686
+
+
+
+sech_Denis_NF712|2L_17M|tig00000010|0.995283018867924
+sech_Denis_NF712|2L_18M|tig00000010|0.989010989010989
+sech_Denis_NF712|2L_19M|tig00000010|0.997762863534676
+sech_Denis_NF712|2R_10M|tig00000190|0.995731056563501
+sech_Denis_NF712|2R_16M|tig00000190|1.0
+sech_Denis_NF712|2R_7M|tig00000190|0.992957746478873
+sech_Denis_NF712|3L_21M|tig00000006|0.997503744383425
+sech_Denis_NF712|3L_22M|tig00000006|0.964539007092199
+sech_Denis_NF712|3L_4M|tig00000037|0.955007256894049
+sech_Denis_NF712|3R_28M|tig00000008|0.997159090909091
+sech_Denis_NF712|3R_2M|tig00000258|0.14572864321608
+sech_Denis_NF712|3R_2M|tig00000284|0.236503856041131
+sech_Denis_NF712|3R_5M|tig00000284|0.994464944649446
+sech_Denis_NF712|3R_9M|tig00000008|0.984461152882205
+
