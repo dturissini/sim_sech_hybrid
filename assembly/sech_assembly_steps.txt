@@ -19,7 +19,25 @@ cd  /work/users/d/t/dturissi/drosophila/ssh/assembly
 
 #make fastq directory and copy over fastq files from read-only directory, and change the file extension since they were not actually zipped
 mkdir fastqs
-cp /proj/matutelb/projects/sech_7_19_24/sech_Denis_NF49.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/introgression/assembly/fastqs/sech_Denis_NF49.fastq
+cp /proj/matutelb/projects/sech_7_19_24/sech_Denis_NF49.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/sech_Denis_NF49.fastq
+
+
+cp /work/users/o/k/okompath/sech_lines_2025/sech_denis_NF_134_20250131.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/DenisNF134.fastq
+cp /work/users/o/k/okompath/sech_lines_2025/sech_pnf_3_20250131.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/SECH_21-sech_PNF3_GTTTCG_L001.fastq
+cp /work/users/o/k/okompath/sech_lines_2025/sech_pnf_5_20250131.fastq.gz /work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/SECH_20-sech_PNF5_GTGGCC_L001.fastq
+
+
+
+
+ml fastqc 
+mkdir fastqc
+sbatch run_fastqc_sech.sbatch
+
+ml bbmap
+
+readlength.sh in=/work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/SECH_21-sech_PNF3_GTTTCG_L001.fastq out=SECH_21-sech_PNF3_GTTTCG_L001.txt
+readlength.sh in=/work/users/d/t/dturissi/drosophila/ssh/assembly/fastqs/sech_Anro_114_female.fastq out=sech_Anro_114_female.txt
+
 
 mkdir assemblies
 
