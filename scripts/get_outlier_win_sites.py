@@ -23,9 +23,9 @@ def create_windows_table(conn, win_size, outlier_type, sites_table, sites_allele
                    der_alleles int)""")
 
                    
-  cur.execute(f"create index idx_odwps_pos_{win_size}{outlier_type} on {sites_table}(pos)")
-  cur.execute(f"create index idx_odwps_win_id_{win_size}{outlier_type} on {sites_table}(win_id)")
-  cur.execute(f"create index idx_odwps_pop_{win_size}{outlier_type} on {sites_table}(pop)")
+  cur.execute(f"create index idx_odwps_pos__{win_size}{outlier_type} on {sites_table}(pos)")
+  cur.execute(f"create index idx_odwps_win_id__{win_size}{outlier_type} on {sites_table}(win_id)")
+  cur.execute(f"create index idx_odwps_pop__{win_size}{outlier_type} on {sites_table}(pop)")
   
   
   cur.execute(f"drop table if exists {sites_alleles_table}")
@@ -37,7 +37,7 @@ def create_windows_table(conn, win_size, outlier_type, sites_table, sites_allele
                    der_allele varchar(1))""")
 
                    
-  cur.execute(f"create index idx_odwpsa_pos_{win_size}{outlier_type} on {sites_alleles_table}(pos)")
+  cur.execute(f"create index idx_odwpsa_pos__{win_size}{outlier_type} on {sites_alleles_table}(pos)")
   
   cur.close()
   
@@ -166,15 +166,38 @@ def main():
     callset, all_pos, refs, alts, samples = load_callset_pos(chrom, zarr_file)
     # Identify the window to extract.
     wind_loc = all_pos.locate_range(start, end)
+    
+    win_pos = all_pos[wind_loc]
+    win_refs = refs[wind_loc]
+    win_alts = alts[wind_loc]
+        
     win_gt = allel.GenotypeArray(callset[wind_loc])
     
     # Intialize pop dictionary.
     idx_pop_dicc = {}
+    idx_pop_dicc['all'] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] != outgroup], return_indices=True)[1]
     for pop in focal_pops + [outgroup]:
         # Fill the dictionary.
         idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
 
+    
+    #identify polymorphic sites
+    total_alleles_all_pops, der_alleles_all_pops = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['all'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+    poly_sites = []
+    for i, pos in enumerate(win_pos):
+      if total_alleles_all_pops[i] > 0:
+        if der_alleles_all_pops[i] / total_alleles_all_pops[i] > 0 and der_alleles_all_pops[i] / total_alleles_all_pops[i] < 1:
+          poly_sites.append(pos)
+          
+      
+      
+    
+    #get outgroup alleles
+    outgroup_alleles_numeric_all = []
+    outgroup_alleles_numeric_all.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
+      
 
+    
     for pop_i in focal_pops:
       #define empty lists corresponding to database fields
       odwps_ids = []
@@ -186,25 +209,27 @@ def main():
       total_alleles = []
       der_alleles = []
 
-    
+
       # Compute derived allele freq
-      total_alleles, der_alleles = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
-      
-      #get outgroup alleles
-      outgroup_alleles_numeric.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
-      
-      for pos in all_pos[wind_loc]:
-        odwps_id += 1
-        odwps_ids.append(odwps_id)
-        win_ids.append(win_id)
-        chroms.append(chrom)
-        positions.append(pos)
-        pops.append(pop_i)
-        
+      total_alleles_all, der_alleles_all = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+    
+      for i, pos in enumerate(win_pos):
+        if pos in poly_sites:                 
+          odwps_id += 1
+          odwps_ids.append(odwps_id)
+          win_ids.append(win_id)
+          chroms.append(chrom)
+          positions.append(pos)
+          pops.append(pop_i)
+          outgroup_alleles_numeric.append(outgroup_alleles_numeric_all[i])
+          total_alleles.append(total_alleles_all[i])
+          der_alleles.append(der_alleles_all[i])
+                    
+          
       #create dataframe using lists that can be loaded into the database table           
       site_df = pd.DataFrame()    
 
-      #add columns to site_df      
+      #add columns to site_df
       site_df["odwps_id"] = odwps_ids  
       site_df["win_id"] = win_ids  
       site_df["chrom"] = chroms  
@@ -220,47 +245,72 @@ def main():
       conn = sqlite3.connect(db_file)
       site_df.to_sql(sites_table, if_exists = 'append', index=False, con=conn)
 
-      if pop_i == focal_pops[0]:
-        #get outgroup and derived alleles
-        odwpsa_ids = []
-        allele_chroms = []
-        allele_positions = []
-        outgroup_alleles = []
-        der_alleles = []
+    #get outgroup and derived alleles
+    odwpsa_ids = []
+    allele_chroms = []
+    allele_positions = []
+    outgroup_alleles = []
+    der_alleles = []
         
-        outgroup_allele_i = 0
-        for i in range(wind_loc.start, wind_loc.stop):
-          alleles = [refs[i][0], alts[i][0]]        
-          der_allele_numeric = abs(outgroup_alleles_numeric[outgroup_allele_i] - 1)
-          outgroup_allele = alleles[outgroup_alleles_numeric[outgroup_allele_i]]
-          der_allele = alleles[der_allele_numeric]
-          
-          outgroup_allele_i += 1
-          odwpsa_id += 1
+    outgroup_allele_i = 0
+    for i, pos in enumerate(win_pos):
+      if pos in poly_sites:
+        alleles = [win_refs[i][0], win_alts[i][0]]        
+        der_allele_numeric = abs(outgroup_alleles_numeric_all[i] - 1)
+        outgroup_allele = alleles[outgroup_alleles_numeric_all[i]]
+        der_allele = alleles[der_allele_numeric]
         
-          odwpsa_ids.append(odwpsa_id)
-          allele_chroms.append(chrom)
-          allele_positions.append(all_pos[i])
-          
-          outgroup_alleles.append(outgroup_allele)
-          der_alleles.append(der_allele)
-          
+        outgroup_allele_i += 1
+        odwpsa_id += 1
         
-             
-        #create dataframe using lists that can be loaded into the database table           
-        site_allele_df = pd.DataFrame()    
+        odwpsa_ids.append(odwpsa_id)
+        allele_chroms.append(chrom)
+        allele_positions.append(win_pos[i])
         
-        #add columns to site_df      
-        site_allele_df["odwpsa_id"] = odwpsa_ids  
-        site_allele_df["chrom"] = allele_chroms  
-        site_allele_df["pos"] = allele_positions
-        site_allele_df["outgroup_allele"] = outgroup_alleles
-        site_allele_df["der_allele"] = der_alleles
-        
-        #import site_df_allele_to db
-        site_allele_df.to_sql(sites_alleles_table, if_exists = 'append', index=False, con=conn)
+        outgroup_alleles.append(outgroup_allele)
+        der_alleles.append(der_allele)
+      
+    
+         
+    #create dataframe using lists that can be loaded into the database table           
+    site_allele_df = pd.DataFrame()    
+    
+    #add columns to site_df      
+    site_allele_df["odwpsa_id"] = odwpsa_ids  
+    site_allele_df["chrom"] = allele_chroms  
+    site_allele_df["pos"] = allele_positions
+    site_allele_df["outgroup_allele"] = outgroup_alleles
+    site_allele_df["der_allele"] = der_alleles
+    
+    #import site_df_allele_to db
+    site_allele_df.to_sql(sites_alleles_table, if_exists = 'append', index=False, con=conn)
     
   conn.commit()
+  
+##  tmp_mono_site_table = 'tmp_mono_sites_' + sites_table
+##  conn.execute(f"""create table {tmp_mono_site_table}
+##                   as select chrom, pos
+##                   from {sites_table}
+##                   group by chrom, pos
+##                   having sum(der_alleles) / sum(total_alleles) > 0
+##                   and sum(der_alleles) / sum(total_alleles) < 1""")
+##  
+##  conn.execute(f"create index idx_tms_pos_{win_size}{outlier_type} on {tmp_mono_site_table}(pos)")
+##  
+##  conn.execute(f"""delete from {sites_table} s
+##                   where exists (select 'x'
+##                                 from {tmp_mono_site_table} t
+##                                 where t.pos = s.pos
+##                                 and t.chrom = s.chrom)""")
+##  
+##  conn.execute(f"""delete from {sites_alleles_table} s
+##                   where exists (select 'x'
+##                                 from {tmp_mono_site_table} t
+##                                 where t.pos = s.pos
+##                                 and t.chrom = s.chrom)""")
+##  
+##  conn.execute(f"""drop table if exists {tmp_mono_site_table}""")
+  
   conn.close()
   
 

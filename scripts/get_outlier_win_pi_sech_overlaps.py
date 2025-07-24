@@ -52,15 +52,15 @@ def main():
   
   d_plus_a = pd.read_sql(f"""select win_id, d_plus
                              from {d_win_table_a}
-                             where num_sites > 1000""", conn)
+                             where num_sites > 10000""", conn)
   
   d_plus_b = pd.read_sql(f"""select win_id, d_plus
                              from {d_win_table_b}
-                             where num_sites > 1000""", conn)
+                             where num_sites > 10000""", conn)
   
   pi_sech = pd.read_sql(f"""select win_id, pi
                             from {poly_win_table}
-                            where num_sites > 1000
+                            where num_sites > 10000
                             and pop = 'sech'""", conn)
   
 

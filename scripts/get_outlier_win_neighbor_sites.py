@@ -133,19 +133,35 @@ def main():
     chrom = win_df.chrom.values[idx]
     start = win_df.start.values[idx]
     end = win_df.end.values[idx]
-     
+    
     # Extract the genotype callset and positions.
     zarr_file = zarr_prefix + '_' + chrom + '.zarr'
     callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
     # Identify the window to extract.
     wind_loc = all_pos.locate_range(start, end)
     win_gt = allel.GenotypeArray(callset[wind_loc])
+    win_pos = all_pos[wind_loc]
     
+
     # Intialize pop dictionary.
     idx_pop_dicc = {}
+    idx_pop_dicc['all'] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] != outgroup], return_indices=True)[1]
     for pop in focal_pops + [outgroup]:
         # Fill the dictionary.
         idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
+
+
+    #get outgroup alleles
+    win_outgroup_alleles = win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0]
+
+    #identify polymorphic sites
+    total_alleles_all_pops, der_alleles_all_pops = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc['all'], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+    poly_sites = []
+    for i, pos in enumerate(win_pos):
+      if total_alleles_all_pops[i] > 0:
+        if der_alleles_all_pops[i] / total_alleles_all_pops[i] > 0 and der_alleles_all_pops[i] / total_alleles_all_pops[i] < 1:
+          poly_sites.append(pos)
+
 
     for pop_i in focal_pops:
       #define empty lists corresponding to database fields
@@ -157,21 +173,23 @@ def main():
       pops = []
       total_alleles = []
       der_alleles = []
-
-    
+      
       # Compute derived allele freq
-      total_alleles, der_alleles = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
+      total_alleles_all, der_alleles_all = get_der_allele_counts(gt=win_gt.take(idx_pop_dicc[pop_i], axis=1), outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1))
       
-      #get outgroup alleles
-      outgroup_alleles.extend(win_gt.take(idx_pop_dicc[outgroup], axis=1)[:, 0, 0])
       
-      for pos in all_pos[wind_loc]:
-        odwnps_id += 1
-        odwnps_ids.append(odwnps_id)
-        win_ids.append(win_id)
-        chroms.append(chrom)
-        positions.append(pos)
-        pops.append(pop_i)
+      for i, pos in enumerate(win_pos):
+        if pos in poly_sites:
+          odwnps_id += 1
+          odwnps_ids.append(odwnps_id)
+          win_ids.append(win_id)
+          chroms.append(chrom)
+          positions.append(pos)
+          outgroup_alleles.append(win_outgroup_alleles[i])
+          pops.append(pop_i)
+          total_alleles.append(total_alleles_all[i])
+          der_alleles.append(der_alleles_all[i])
+          
         
       #create dataframe using lists that can be loaded into the database table           
       site_df = pd.DataFrame()    

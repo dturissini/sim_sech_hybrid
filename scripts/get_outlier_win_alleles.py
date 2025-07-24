@@ -74,20 +74,18 @@ def main():
 
   pops = list(set(meta_df['pop']))
 
+  #get outgroup
+  outgroup = pop_str.split('_')[3]
+
+
   outlier_sql = f"""select win_id, chrom, start, end
                     from {d_win_table}
                     where win_id in (select distinct win_id from {sites_table})"""
                     
   outlier_win_df = pd.read_sql(outlier_sql, conn)
   
+    
   
-  #get outgroup
-  outgroup = pop_str.split('_')[3]
-  
-  
-  
-  # Get alleles for the user provided pop for every outlier window 
-  sample_ids = list(meta_df['sample_id'][meta_df['pop'] == pop])
   odwsa_id = 0
   with tempfile.NamedTemporaryFile(mode='w') as t:
     for idx in range(outlier_win_df.shape[0]):
@@ -103,42 +101,92 @@ def main():
       # Identify the window to extract.
       wind_loc = all_pos.locate_range(start, end)
       win_gt = allel.GenotypeArray(callset[wind_loc])
+      win_pos = all_pos[wind_loc]
       
       # Intialize pop dictionary.
       idx_pop_dicc = {}
-      for pop in pops + [outgroup]:
+      for pop_i in pops + [outgroup]:
           # Fill the dictionary.
-          idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
+          idx_pop_dicc[pop_i] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop_i], return_indices=True)[1]
+          # Get alleles for the user provided pop for every outlier window 
       
+      #get list of pop samples in the same ordering as in the zarr
+      sample_idx = idx_pop_dicc[pop].tolist()
+      sample_ids = [samples[i] for i in sample_idx]
+
+
       pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
       outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1)
       
-      total_alleles = pop_gt.count_alleles().sum(axis=1)
+      total_alleles_all = pop_gt.count_alleles().sum(axis=1)
       # If there are no altenative alleles...
       if (pop_gt.count_alleles().shape[1] == 1):
           # Calculate alternative allele frequencies.
-          alt_alleles = pop_gt.count_alleles()[:, 0] - 1
+          alt_alleles_all = pop_gt.count_alleles()[:, 0] - 1
       else:
           # Calculate alternative allele frequencies.
-          alt_alleles = pop_gt.count_alleles()[:, 1]    
-                
-      for pos_i in range(pop_gt.shape[0]):
-        if alt_alleles[pos_i] not in [total_alleles[pos_i], 0]:
-          pos = all_pos[wind_loc][pos_i]
-          
-          for sample_i, sample_id in enumerate(sample_ids):
-            num_alt_alleles = pop_gt[pos_i, sample_i][0] + pop_gt[pos_i, sample_i][1]  
-            num_der_alleles = num_alt_alleles
-            if outgroup_gt[pos_i,][0][0] == 1 and num_alt_alleles != -2:
-              num_der_alleles = 2 - num_alt_alleles
-            odwsa_id += 1
-            t.write(f"{odwsa_id}\t{win_id}\t{chrom}\t{pos}\t{sample_id}\t{num_der_alleles}\n")  
+          alt_alleles_all = pop_gt.count_alleles()[:, 1]    
+      
+
+      #identify polymorphic sites
+      poly_sites = []
+      for i, pos in enumerate(win_pos):
+        if total_alleles_all[i] > 0:
+          if alt_alleles_all[i] / total_alleles_all[i] > 0 and alt_alleles_all[i] / total_alleles_all[i] < 1:
+            poly_sites.append(pos)
+
+
+      for i, pos in enumerate(win_pos):
+        if pos in poly_sites:        
+          if alt_alleles_all[i] not in [total_alleles_all[i], 0]:
+            for sample_i, sample_id in enumerate(sample_ids):
+              num_alt_alleles = pop_gt[i, sample_i][0] + pop_gt[i, sample_i][1]  
+              num_der_alleles = num_alt_alleles
+              if outgroup_gt[i,][0][0] == 1 and num_alt_alleles != -2:
+                num_der_alleles = 2 - num_alt_alleles
+              odwsa_id += 1
+              t.write(f"{odwsa_id}\t{win_id}\t{chrom}\t{pos}\t{sample_id}\t{num_der_alleles}\n")  
         
           
     t.flush()         
     os.system(f"""sqlite3 {db_file} ".mode tabs" ".import {t.name} {win_allele_table}" """)
 
-           
+
+
+
+
+##      pop_gt=win_gt.take(idx_pop_dicc[pop], axis=1)
+##      outgroup_gt=win_gt.take(idx_pop_dicc[outgroup], axis=1)
+##      
+##      total_alleles_all = pop_gt.count_alleles().sum(axis=1)
+##      # If there are no altenative alleles...
+##      if (pop_gt.count_alleles().shape[1] == 1):
+##          # Calculate alternative allele frequencies.
+##          alt_alleles_all = pop_gt.count_alleles()[:, 0] - 1
+##      else:
+##          # Calculate alternative allele frequencies.
+##          alt_alleles_all = pop_gt.count_alleles()[:, 1]    
+##                
+##
+##      #identify polymorphic sites
+##      poly_sites = []
+##      for i, pos in enumerate(win_pos):
+##        if total_alleles_all[i] > 0:
+##          if alt_alleles_all[i] / total_alleles_all[i] > 0 and alt_alleles_all[i] / total_alleles_all[i] < 1:
+##            poly_sites.append(pos)
+##
+##
+##      for i, pos in enumerate(win_pos):
+##        if pos in poly_sites:        
+##          if alt_alleles_all[i] not in [total_alleles_all[i], 0]:
+##            for sample_i, sample_id in enumerate(sample_ids):
+##              num_alt_alleles = pop_gt[i, sample_i][0] + pop_gt[i, sample_i][1]  
+##              num_der_alleles = num_alt_alleles
+##              if outgroup_gt[i,][0][0] == 1 and num_alt_alleles != -2:
+##                num_der_alleles = 2 - num_alt_alleles
+##              odwsa_id += 1
+##              t.write(f"{odwsa_id}\t{win_id}\t{chrom}\t{pos}\t{sample_id}\t{num_der_alleles}\n")  
+          
   
 
 if __name__ == '__main__':

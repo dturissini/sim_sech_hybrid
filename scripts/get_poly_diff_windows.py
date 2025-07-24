@@ -197,6 +197,8 @@ def main():
                             where s.sample_id = l.sample_id
                             and l.pop in ({pop_sql_str})""", conn)
       
+  pops = list(set(meta_df['pop']))
+  print(pops)
     
   #intialize a dictionary of chromosome lengths
   chrom_query = conn.execute("""select chrom, chrom_len 
@@ -306,6 +308,13 @@ def main():
               #extract the genotypes and positions
               zarr_file = zarr_prefix + '_' + chrom + '.zarr'
               callset, all_pos, samples = load_callset_pos(chrom, zarr_file)
+
+              # Intialize pop dictionary.
+              idx_pop_dicc = {}
+              for pop in pops + [outgroup]:
+                  # Fill the dictionary.
+                  idx_pop_dicc[pop] = np.intersect1d(samples, meta_df['sample_id'][meta_df['pop'] == pop], return_indices=True)[1]
+
               #get the windows
               wind_loc = all_pos.locate_range(start, end)
               
