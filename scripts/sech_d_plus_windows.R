@@ -8,8 +8,9 @@ win_size <- args[1]
 
 #define file paths
 base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
+plots_dir <- paste(base_dir, 'plots/', sep='')
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
-pdf_file <- paste('sech_denis_dplus_win_', win_size, '.pdf', sep='')
+pdf_file <- paste(plots_dir, 'sech_denis_dplus_win_', win_size, '.pdf', sep='')
 
 setwd(base_dir)
 

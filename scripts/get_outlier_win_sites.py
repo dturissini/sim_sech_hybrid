@@ -160,6 +160,8 @@ def main():
     chrom = win_df.chrom.values[idx]
     start = win_df.start.values[idx]
     end = win_df.end.values[idx]
+    
+    print(outlier_type, chrom, start, end)
      
     # Extract the genotype callset and positions.
     zarr_file = zarr_prefix + '_' + chrom + '.zarr'

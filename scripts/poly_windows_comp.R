@@ -10,8 +10,9 @@ table_suffix_b <- args[3]
 
 #define file paths
 base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
+plots_dir <- paste(base_dir, 'plots/', sep='')
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
-pdf_file <- paste('poly_win_comp_', win_size, '_', table_suffix_a, '_', table_suffix_b, '.pdf', sep='')
+pdf_file <- paste(plots_dir, 'poly_win_comp_', win_size, '_', table_suffix_a, '_', table_suffix_b, '.pdf', sep='')
 
 setwd(base_dir)
 

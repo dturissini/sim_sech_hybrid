@@ -9,8 +9,9 @@ pop_str <- as.character(args[2])
 
 #define file paths
 base_dir <- '/work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/'
+plots_dir <- paste(base_dir, 'plots/', sep='')
 db_file <- paste(base_dir, 'ssh_d_win.db', sep='')
-pdf_file <- paste('outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_str, '.pdf', sep='')
+pdf_file <- paste(plots_dir, 'outlier_pi_sech_adj_allele_dists_', win_size, '_', pop_str, '.pdf', sep='')
 
 setwd(base_dir)
 
