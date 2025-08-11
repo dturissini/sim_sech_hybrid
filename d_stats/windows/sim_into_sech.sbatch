@@ -1,0 +1,74 @@
+#!/bin/bash
+#SBATCH -p general
+#sbatch -J sim_into_sech
+#SBATCH --cpus-per-task=1
+#SBATCH -t 96:00:00
+#SBATCH --mem=8g
+#SBATCH -o /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/logs/sim_into_sech_%A.out
+#SBATCH -e /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/logs/sim_into_sech_%A.err
+
+
+ml python/3.12.2 
+
+#d_stat wins
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Praslin as the non-recipient
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sechpras \
+                                                                                                       sechbase \
+                                                                                                       sim \
+                                                                                                       mel \
+                                                                                                       50000 \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/genotyping/zarrs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                       
+
+
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Denis as the non-recipient
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sechden \
+                                                                                                       sechbase \
+                                                                                                       sim \
+                                                                                                       mel \
+                                                                                                       50000 \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/genotyping/zarrs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                       
+#get window D statistics for sech_pras_sechbase_sim_mel using sech base samples (Anro, La Digue, Marianne) as the recipient pop and sech Denis and Praslin as the non-recipient
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_d_stat_windows.py sechdepr \
+                                                                                                       sechbase \
+                                                                                                       sim \
+                                                                                                       mel \
+                                                                                                       50000 \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/genotyping/zarrs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup \
+                                                                                                       /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+                                                                                                       
+
+#create pdf reports for D statistic windows                                                                                                       
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/d_plus_windows.R 50000 sechpras_sechbase_sim_mel
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/d_plus_windows.R 50000 sechden_sechbase_sim_mel
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/d_plus_windows.R 50000 sechdepr_sechbase_sim_mel
+
+
+
+
+#create pdfs containing plots showing polymorphism, D statistic, and divergence stats across the genome
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/poly_windows.R 50000 sechpras_sechbase_sim_mel
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/poly_windows.R 50000 sechden_sechbase_sim_mel
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/poly_windows.R 50000 sechdepr_sechbase_sim_mel
+
+
+#get overlap between outlier pi_sech and dplus windows
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_pi_sech_overlaps.py 50000 \
+                                                                                                                     sim_ssh_sech_mel \
+                                                                                                                     sechpras_sechbase_sim_mel \
+                                                                                                                     /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+
+
+
+python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_outlier_win_pi_sech_overlaps.py 50000 \
+                                                                                                                     sim_ssh_sech_mel \
+                                                                                                                     sechdepr_sechbase_sim_mel \
+                                                                                                                     /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
+
+
+#generate comp report pdfs that show trace reports across each chromosome for AB counts and D+ for each of the two provided sets of four ABBA-BABA populations as well as pi for the two sech populations as well as all sech samples
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/poly_windows_comp.R 50000 sim_ssh_sech_mel sechpras_sechbase_sim_mel
+Rscript /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/poly_windows_comp.R 50000 sim_ssh_sech_mel sechdepr_sechbase_sim_mel
