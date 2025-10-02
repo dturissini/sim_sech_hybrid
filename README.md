@@ -29,7 +29,6 @@ The starting vcf file only had samples from the D. simulans clade and lacked an 
         * Inputs: 
             * reference species name
             * outgroup species name
-            * maf file path
             * outgroup genome fasta file path
             * input vcf file path
             * output vcf file path

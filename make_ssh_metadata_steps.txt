@@ -25,7 +25,7 @@ sqlite3 /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ss
           
 #process metadata to make a db table linking sample_id to population using the same sample order as the vcf to simplify later processing
 python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/get_filtered_metadata.py /proj/matutelb/projects/gwas/genotype_datasets/sech_oa/sim_sech_final_samplelist.tsv \
-                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel_2L.recode.vcf.gz \
+                                                                                                          /work/users/d/t/dturissi/drosophila/ssh/genotyping/filtered_vcfs/sim_sech_hybrid_filtered_biallelic_snp_mel_outgroup_2L.vcf.gz \
                                                                                                           /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/windows/ssh_d_win.db
 
 

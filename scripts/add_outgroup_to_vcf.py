@@ -3,7 +3,7 @@ import os
 import re
 import gzip
 
-#python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/add_outgroup_to_vcf.py D_SIMULANS D_MELANOGASTER /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/sim_mel.maf /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/mel_aligned_sim.fasta /proj/matutelb/data_share/simulans_OA_resistance/simulans_sechellia.vcf.gz /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel.vcf.gz
+#python3 /work/users/d/t/dturissi/drosophila/ssh/introgression/scripts/add_outgroup_to_vcf.py D_SIMULANS D_MELANOGASTER /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/mel_aligned_sim.fasta /proj/matutelb/data_share/simulans_OA_resistance/simulans_sechellia.vcf.gz /work/users/d/t/dturissi/drosophila/ssh/introgression/sim_sech_outgroup_mel.vcf.gz
 
 
 
@@ -11,7 +11,6 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("ref_species")
     parser.add_argument("outgroup_species")
-    parser.add_argument("maf_file")
     parser.add_argument("outgroup_fasta_file")    
     parser.add_argument("vcf_file_in")
     parser.add_argument("vcf_file_out")
@@ -23,7 +22,6 @@ def main():
   args = parse_args()
   ref_species = args.ref_species  
   outgroup_species = args.outgroup_species  
-  maf_file = args.maf_file
   outgroup_fasta_file = args.outgroup_fasta_file
   vcf_file_in = args.vcf_file_in
   vcf_file_out = args.vcf_file_out  

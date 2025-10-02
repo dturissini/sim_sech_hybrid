@@ -36,6 +36,8 @@ sbatch /work/users/d/t/dturissi/drosophila/ssh/introgression/d_stats/cactus_hal2
 #################
 #add mel alleles to vcf
 #################
+sbatch maf_to_fasta.sbatch
+
 sbatch add_mel_to_sim_vcf.sbatch
 
 
